@@ -1,5 +1,8 @@
 <!doctype html>
-<html lang="en">
+<html
+  lang="en"
+  class="text-secondary w-full h-auto bg-pills-pink scrollbar-track-transparent scroll-smooth"
+>
   <head>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,7 +16,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     %sveltekit.head%
   </head>
-  <body data-sveltekit-preload-data="hover">
-    <div style="display: contents">%sveltekit.body%</div>
+  <body
+    class="transition-all h-auto will-change-auto w-full min-h-screen bg-pills-pink"
+  >
+    <div>%sveltekit.body%</div>
   </body>
 </html>
