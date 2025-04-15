@@ -71,18 +71,16 @@
   </div>
 
   <!-- CTA -->
-  <div class="text-center bg-purple-50 rounded-xl p-8 md:p-12">
+  <div class="text-center w-full bg-purple-50 p-8 md:p-12">
     <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-      Have a hard pill to share?
+      "I need a doctor!"
     </h2>
-    <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-      Submit your own perspective and join our community of truth-seekers.
-    </p>
+    <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">Need some advice</p>
     <Button
       href="/submit"
       class="bg-purple-700 hover:bg-purple-800 text-white font-medium px-6"
     >
-      Submit an Article
+      Submit your request
     </Button>
   </div>
 </div>

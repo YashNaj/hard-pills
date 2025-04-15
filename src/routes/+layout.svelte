@@ -7,6 +7,7 @@
   import HardPillsLogo from "$lib/assets/hard_pills.png";
   import MobileDrawer from "./mobile-drawer.svelte";
   import DesktopNav from "./desktop-nav.svelte";
+  import Footer from "./footer.svelte"
 
   let { data, children } = $props();
 
@@ -29,9 +30,11 @@
   });
 </script>
 
-<header
-  class="z-[49] bg-pills-pink flex justify-between top-0 left-0 right-0 w-screen h-20 place-items-center fixed"
->
+
+
+
+<div class="flex flex-col min-h-screen">
+  <header class="z-[49] bg-pills-pink flex justify-between h-20 place-items-center fixed w-full">
   <a class="w-40 h-full 400/50" id="container-logo relative" href="/">
     <img
       alt="hard pills logo"
@@ -39,15 +42,18 @@
       class="md:max-h-auto max-w-full object-cover h-full md:w-full"
     />
   </a>
-
   <!-- Use the exported ROUTES constant -->
   <DesktopNav {currentPath} />
 
   <div class="drawer-trigger md:hidden">
     <MobileDrawer />
   </div>
-</header>
+    <!-- Header content -->
+  </header>
 
-<main class="w-screen h-auto pt-20">
-  {@render children?.()}
-</main>
+  <main class="flex-grow pt-20">
+    {@render children?.()}
+  </main>
+  
+  <Footer />
+</div>
