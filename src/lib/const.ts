@@ -11,3 +11,18 @@ export const THEME_COLORS = {
     fill: "#FFFFFF", // Pure white fill for dark mode
   },
 };
+
+export const ROUTES = {
+  home: {
+    url: "/",
+    title: "Home",
+  },
+  about: {
+    url: "/about",
+    title: "About",
+  },
+  submit: {
+    url: "/submit",
+    title: "Submit",
+  },
+};
