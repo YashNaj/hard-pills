@@ -60,7 +60,7 @@
   });
 </script>
 
-<div class="container mx-auto p-4 -rotate-1">
+<div class="container mx-auto p-4 mb-5 -rotate-1">
   <div class="prescription-container mx-auto">
     <!-- Prescription Header -->
     <div class="rx-header">
