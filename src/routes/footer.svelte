@@ -32,12 +32,12 @@
           <input
             type="email"
             placeholder="Your email"
-            class="px-3 py-2 text-sm rounded-l-md border-y border-l border-black flex-grow"
+            class="px-3 py-2 text-sm rounded-l-md border-y bg-transparent border-l border-black flex-grow"
             required
           />
           <button
             type="submit"
-            class="px-3 py-2 bg-purple-700 text-white text-sm font-bold rounded-r-md hover:bg-purple-800 transition-colors"
+            class="px-3 py-2 bg-black text-pills-pink text-sm font-bold rounded-r-md hover:bg-black transition-colors"
           >
             SUBSCRIBE
           </button>
@@ -46,7 +46,7 @@
     </div>
 
     <!-- Divider -->
-    <div class="border-t border-black/20 my-4" />
+    <div class="border-t border-black/20 my-4"></div>
 
     <!-- Bottom footer section with copyright and social links -->
     <div class="flex justify-between w-full h-auto">
@@ -72,7 +72,6 @@
   <div class="text-white section-tech-and-make w-full font-inter py-6 bg-black">
     <!-- Created by section -->
     <div class="container mx-auto px-4 w-full">
-
       <!-- disclaimers and trademarks -->
       <div class="mb-6 opacity-40">
         <div
@@ -107,7 +106,7 @@
           <div class="flex w-full h-auto justify-between mb-1">
             <a
               href="mailto:business@yashnaj.dev"
-              class="text-xs flex items-center hover:text-pills-pink hover:opacity-100  transition-all text-left"
+              class="text-xs flex items-center hover:text-pills-pink hover:opacity-100 transition-all text-left"
             >
               business@yashnaj.dev
             </a>

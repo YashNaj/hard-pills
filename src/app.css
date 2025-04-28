@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @plugin '@tailwindcss/forms';
-
+@layer theme, base, components, utilities;
 @theme {
   --font-sans:
     "Bangers", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",

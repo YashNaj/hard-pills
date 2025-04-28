@@ -6,7 +6,7 @@
   let { posts } = $props();
 </script>
 
-<div class="space-y-8 w-full">
+<div class="space-y-8">
   {#each posts as post (post.id)}
     <PostCard
       id={post.id}

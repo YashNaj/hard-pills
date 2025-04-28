@@ -1,0 +1,157 @@
+/* === Halftone Base Styles === */
+
+/* Set up CSS variables for easier configuration */
+:root {
+  --ht-contrast: 50; /* Default contrast level */
+  --ht-bg-color: white; /* Default background */
+
+  /* Size definitions */
+  --ht-size-xs-stop1: 0.04rem;
+  --ht-size-xs-stop2: 0.3rem;
+  --ht-size-xs-bg-size: 0.8rem;
+
+  --ht-size-sm-stop1: 0.06rem;
+  --ht-size-sm-stop2: 0.65rem;
+  --ht-size-sm-bg-size: 1.3rem;
+
+  --ht-size-md-stop1: 0.1rem;
+  --ht-size-md-stop2: 0.8rem;
+  --ht-size-md-bg-size: 1.5rem;
+
+  --ht-size-lg-stop1: 0.15rem;
+  --ht-size-lg-stop2: 1rem;
+  --ht-size-lg-bg-size: 2rem;
+}
+
+/* The main container class */
+.halftone {
+  position: relative;
+  overflow: hidden; /* Clip the ::after element */
+  background-color: var(
+    --ht-current-bg-color,
+    var(--ht-bg-color)
+  ); /* Use specific or default bg */
+  /* Apply contrast filter, allowing for inversion */
+  filter: contrast(var(--ht-current-contrast, var(--ht-contrast)))
+    invert(var(--ht-current-invert, 0));
+
+  /* Define variables used within this component instance */
+  --ht-current-stop1: 0.1rem;
+  --ht-current-stop2: 0.5rem;
+  --ht-current-bg-size: 1rem;
+  --ht-current-bg-image: radial-gradient(
+    circle at center,
+    black var(--ht-current-stop1),
+    transparent var(--ht-current-stop2)
+  );
+  --ht-current-bg-position: center center;
+  --ht-current-mask-image: none;
+  --ht-current-invert: 0; /* Default to not inverted */
+}
+
+/* The pseudo-element holding the pattern */
+.halftone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1; /* Optional */
+
+  /* Apply styles based on variables set by the parent .halftone and its modifiers */
+  background-image: var(--ht-current-bg-image);
+  background-position: var(--ht-current-bg-position);
+  background-size: var(--ht-current-bg-size) var(--ht-current-bg-size);
+  background-repeat: round;
+
+  mask-image: var(--ht-current-mask-image);
+  -webkit-mask-image: var(--ht-current-mask-image); /* Safari prefix */
+  /* mask-repeat, mask-position, mask-size can be added here if needed */
+}
+
+/* === Modifier Classes === */
+
+/* --- Size Modifiers --- */
+/* Override the current variables for dot size/spacing */
+.halftone--size-xs {
+  --ht-current-stop1: var(--ht-size-xs-stop1);
+  --ht-current-stop2: var(--ht-size-xs-stop2);
+  --ht-current-bg-size: var(--ht-size-xs-bg-size);
+}
+.halftone--size-sm {
+  --ht-current-stop1: var(--ht-size-sm-stop1);
+  --ht-current-stop2: var(--ht-size-sm-stop2);
+  --ht-current-bg-size: var(--ht-size-sm-bg-size);
+}
+.halftone--size-md {
+  --ht-current-stop1: var(--ht-size-md-stop1);
+  --ht-current-stop2: var(--ht-size-md-stop2);
+  --ht-current-bg-size: var(--ht-size-md-bg-size);
+}
+.halftone--size-lg {
+  --ht-current-stop1: var(--ht-size-lg-stop1);
+  --ht-current-stop2: var(--ht-size-lg-stop2);
+  --ht-current-bg-size: var(--ht-size-lg-bg-size);
+}
+
+/* --- Pattern Modifier --- */
+/* Override background image/position for angled pattern */
+.halftone--pattern-angled {
+  --ht-current-bg-image:
+    radial-gradient(
+      circle at center,
+      black var(--ht-current-stop1),
+      transparent var(--ht-current-stop2)
+    ),
+    radial-gradient(
+      circle at center,
+      black var(--ht-current-stop1),
+      transparent var(--ht-current-stop2)
+    );
+  --ht-current-bg-position:
+    0 0, calc(var(--ht-current-bg-size) / 2) calc(var(--ht-current-bg-size) / 2);
+}
+
+/* --- Mask Modifiers --- */
+/* Override the mask image variable */
+.halftone--mask-fade-y {
+  --ht-current-mask-image: linear-gradient(
+    to bottom,
+    black,
+    rgba(0, 0, 0, 0.5)
+  );
+}
+.halftone--mask-fade-x {
+  --ht-current-mask-image: linear-gradient(to right, black, rgba(0, 0, 0, 0.5));
+}
+.halftone--mask-fade-radial {
+  --ht-current-mask-image: radial-gradient(
+    circle at center,
+    black,
+    rgba(0, 0, 0, 0.5)
+  );
+}
+.halftone--mask-fade-conic {
+  --ht-current-mask-image: conic-gradient(
+    from 90deg at 50% 50%,
+    black,
+    rgba(0, 0, 0, 0.5),
+    black
+  );
+}
+/* For URL masks, you'd typically set the variable via inline style */
+/* .halftone--mask-url { --ht-current-mask-image: var(--ht-mask-url-value); } */
+
+/* --- Blend Mode Modifiers --- */
+/* Apply mix-blend-mode directly */
+.halftone--blend-multiply {
+  mix-blend-mode: multiply;
+}
+.halftone--blend-screen {
+  mix-blend-mode: screen;
+}
+
+/* --- Inversion Modifier --- */
+/* Set the invert variable */
+.halftone--inverted {
+  --ht-current-invert: 1;
+}

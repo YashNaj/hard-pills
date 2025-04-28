@@ -1,5 +1,5 @@
 // src/lib/data/posts.ts
-// Dummy data for posts
+// Dummy data for posts with added content
 
 export interface Post {
   id: string;
@@ -9,20 +9,41 @@ export interface Post {
   date: string;
   categories: string[];
   imageUrl: string | null;
-  content?: string;
+  content?: string; // Content is now added below
 }
 
+// Basic dummy content generator
+function generateDummyContent(title: string): string {
+  return `
+    <h2>Introduction to ${title}</h2>
+    <p>This is the main body of the article exploring the nuances of "${title}". Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    <img src="https://picsum.photos/seed/${title.replace(/\s+/g, "-")}/800/400" alt="Related image for ${title}" />
+    <h3>Key Concepts</h3>
+    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <ul>
+        <li>Understanding the core principles.</li>
+        <li>Applying the ideas in real life.</li>
+        <li>Overcoming common challenges.</li>
+    </ul>
+    <h2>Conclusion</h2>
+    <p>In conclusion, "${title}" requires careful consideration and practice. We hope this article provides a good starting point.</p>
+    `;
+}
+
+// --- Featured Post ---
 export const featuredPost: Post = {
   id: "featured-1",
   title: "The Hardest Pill: Accepting When You're Wrong",
   description:
     "Exploring the psychological challenges of admitting errors and how it leads to personal growth.",
   author: "Alex Johnson",
-  date: "April 12, 2025",
+  date: "2025-04-12",
   categories: ["Psychology", "Growth"],
   imageUrl: "/hard_pills.png",
+  content: generateDummyContent("Accepting When You're Wrong"), // Added content
 };
 
+// --- Recent Posts ---
 export const recentPosts: Post[] = [
   {
     id: "post-1",
@@ -30,9 +51,10 @@ export const recentPosts: Post[] = [
     description:
       "How radical honesty transforms relationships and creates deeper connections.",
     author: "Jamie Smith",
-    date: "April 10, 2025",
+    date: "2025-04-10",
     categories: ["Relationships"],
-    imageUrl: null,
+    imageUrl: "https://picsum.photos/seed/post-1/600/338",
+    content: generateDummyContent("Communication Without Filters"), // Added content
   },
   {
     id: "post-2",
@@ -40,9 +62,10 @@ export const recentPosts: Post[] = [
     description:
       "Signs that you've outgrown your current position and how to take the leap.",
     author: "Pat Garcia",
-    date: "April 8, 2025",
+    date: "2025-04-08",
     categories: ["Career", "Growth"],
-    imageUrl: null,
+    imageUrl: "https://picsum.photos/seed/post-2/600/338",
+    content: generateDummyContent("Career Plateaus"), // Added content
   },
   {
     id: "post-3",
@@ -50,18 +73,21 @@ export const recentPosts: Post[] = [
     description:
       "Understanding the psychological hooks of platforms and breaking free.",
     author: "Jordan Lee",
-    date: "April 5, 2025",
+    date: "2025-04-05",
     categories: ["Technology", "Wellbeing"],
-    imageUrl: null,
+    imageUrl: "https://picsum.photos/seed/post-3/600/338",
+    content: generateDummyContent("Digital Detox"), // Added content
   },
+  // ... Add content for post-4, post-5, post-6 similarly ...
   {
     id: "post-4",
     title: "Financial Responsibility: Living Below Your Means",
     description: "Why cutting back now can lead to true freedom later.",
     author: "Taylor Kim",
-    date: "April 2, 2025",
+    date: "2025-04-02",
     categories: ["Finance"],
-    imageUrl: null,
+    imageUrl: "https://picsum.photos/seed/post-4/600/338",
+    content: generateDummyContent("Living Below Your Means"),
   },
   {
     id: "post-5",
@@ -69,22 +95,31 @@ export const recentPosts: Post[] = [
     description:
       "Tools for identifying and addressing unconscious bias in your thinking.",
     author: "Sam Rivera",
-    date: "March 30, 2025",
+    date: "2025-03-30",
     categories: ["Society", "Psychology"],
-    imageUrl: null,
+    imageUrl: "https://picsum.photos/seed/post-5/600/338",
+    content: generateDummyContent("Confronting Bias"),
   },
   {
     id: "post-6",
     title: "The Myth of Perfection: Embracing Good Enough",
     description: "How perfectionism harms progress and what to do instead.",
     author: "Alex Johnson",
-    date: "March 28, 2025",
+    date: "2025-03-28",
     categories: ["Productivity", "Wellbeing"],
-    imageUrl: null,
+    imageUrl: "https://picsum.photos/seed/post-6/600/338",
+    content: generateDummyContent("Embracing Good Enough"),
   },
 ];
 
-// You can derive popularPosts or other custom lists from recentPosts
+// --- Popular Posts ---
 export const popularPosts: Post[] = [...recentPosts]
-  .sort(() => 0.5 - Math.random()) // Simple randomization for demo
-  .slice(0, 4); // Take top 4
+  .sort(() => 0.5 - Math.random())
+  .slice(0, 4);
+
+// --- Helper function for fetching a single post ---
+export function getPostById(id: string): Post | undefined {
+  // Combine featured and recent for lookup
+  const allPosts = [featuredPost, ...recentPosts];
+  return allPosts.find((post) => post.id === id);
+}

@@ -1,0 +1,118 @@
+/* src/view-transitions.css */
+
+/* --- Base Keyframes --- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes fade-in-delay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- View Transition Overrides --- */
+
+/* Let the browser handle default morph/fade for named elements */
+/* No specific rules needed here unless customizing duration/easing */
+
+/* Apply delayed animation ONLY to the NEW content element */
+::view-transition-new(post-*-content) {
+  animation: fade-in-delay 0.4s ease-out 0.15s forwards;
+  z-index: 1;
+}
+
+/* Define how the OLD content block fades out */
+::view-transition-old(post-*-content) {
+  animation: fade-out 0.2s ease-out forwards;
+  z-index: 0;
+}
+@keyframes slide-from-right {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-to-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+}
+
+/* Define a base duration and easing for named elements */
+:root {
+  --vt-duration: 0.4s; /* Base duration */
+  /* Example: Material Design standard curve - adjust as desired */
+  --vt-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Apply base duration and easing to all morphing groups */
+::view-transition-group(post-*-image),
+::view-transition-group(post-*-categories),
+::view-transition-group(post-*-title),
+::view-transition-group(post-*-meta) {
+  animation-duration: var(--vt-duration);
+  animation-timing-function: var(--vt-easing);
+}
+
+/* --- Staging using Delays --- */
+/* Apply specific delays for the animation start */
+
+/* Image starts slightly first */
+::view-transition-group(post-*-image) {
+  animation-delay: 0s;
+}
+
+/* Categories and Meta start together, slightly after image */
+::view-transition-group(post-*-categories),
+::view-transition-group(post-*-meta) {
+  animation-delay: 0.05s; /* Adjust delay as needed */
+}
+
+/* Title starts slightly after categories/meta */
+::view-transition-group(post-*-title) {
+  animation-delay: 0.1s; /* Adjust delay as needed */
+}
+
+/* --- Content Fade-in --- */
+/* Apply delayed fade-in ONLY to the NEW content element */
+/* Ensure its delay starts after the title morph begins */
+::view-transition-new(post-*-content) {
+  animation-name: fade-in-delay; /* Use specific keyframe if needed */
+  animation-duration: 0.4s; /* Can have its own duration */
+  animation-timing-function: ease-out; /* Can have its own easing */
+  animation-delay: 0.15s; /* THE DELAY - starts after title */
+  animation-fill-mode: forwards;
+  z-index: 1; /* Ensure it appears */
+}
+
+/* Define how the OLD content block fades out (if applicable) */
+::view-transition-old(post-*-content) {
+  animation: fade-out 0.2s ease-out forwards;
+  z-index: 0;
+}
