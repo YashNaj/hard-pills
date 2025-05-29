@@ -2,8 +2,9 @@
 <script lang='ts'>
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-    import { onMount } from 'svelte';             // Import onMount
+	import { onMount } from 'svelte'; // Import onMount
 	import { browser } from '$app/environment'; // Import browser
+	// Removed unused Svelte fade import
 
 	// Define props using Svelte 5 syntax
 	let { id, title, description, author, date, categories, imageUrl } = $props();
@@ -20,7 +21,7 @@
 		}
 	}
 
-    // --- View Transition Setup ---
+	// --- View Transition Setup ---
 	let viewTransitionStyleBase = $state('');
 	onMount(() => {
 		if (browser && 'startViewTransition' in document) {
@@ -28,18 +29,21 @@
 		}
 	});
 
-	// Names for elements that should morph (using the component's 'id' prop)
+	// Names for elements that should morph
 	const imageTransitionName = $derived(viewTransitionStyleBase ? `${viewTransitionStyleBase} post-${id}-image` : '');
 	const titleTransitionName = $derived(viewTransitionStyleBase ? `${viewTransitionStyleBase} post-${id}-title` : '');
 	const categoriesTransitionName = $derived(viewTransitionStyleBase ? `${viewTransitionStyleBase} post-${id}-categories` : '');
 	const metaTransitionName = $derived(viewTransitionStyleBase ? `${viewTransitionStyleBase} post-${id}-meta` : '');
+	// ADD name for the content area itself
+	const featuredContentAreaTransitionName = $derived(viewTransitionStyleBase ? `${viewTransitionStyleBase} featured-content-area` : '');
 	// --- End View Transition Setup ---
 
 </script>
 
 <div
-	class="relative mx-auto w-screen border-4 border-black bg-purple-700 shadow-[0px_0px_0px_6px_#000000] overflow-hidden mt-2 transition-colors transform-all"
+	class="relative mx-auto w-screen border-4 border-black bg-black shadow-[0px_0px_0px_6px_#000000] overflow-hidden mt-2"
 >
+
 	{#if imageUrl}
 		<div
 			class="absolute inset-0 opacity-40 md:opacity-60 mix-blend-luminosity pointer-events-none"
@@ -48,21 +52,21 @@
 				src={imageUrl}
 				alt=""
 				class="w-full h-full object-cover object-right md:object-center"
-                style={imageTransitionName} 
+                style={imageTransitionName}
 			/>
 		</div>
 	{/if}
 
-	<!-- Content Layer -->
-	<div class="relative z-10 p-6 md:p-10 lg:p-12 text-white">
-		<!-- "FEATURED" Title - No transition name -->
+	<div
+        class="relative z-10 p-6 md:p-10 lg:p-12 text-white"
+        style={featuredContentAreaTransitionName} 
+    >
 		<h2
 			class="text-5xl md:text-6xl font-extrabold mb-4 uppercase text-pills-pink font-heading tracking-wider"
 		>
 			FEATURED
 		</h2>
 
-		<!-- CATEGORIES WRAPPER: Add transition name -->
 		<div class="flex flex-wrap gap-2 mb-4" style={categoriesTransitionName}>
 			{#each categories as category}
 				<Badge
@@ -74,30 +78,26 @@
 			{/each}
 		</div>
 
-		<!-- TITLE: Add transition name -->
 		<h3
 			class="text-3xl md:text-4xl font-bold mb-4 uppercase text-white font-heading tracking-wide"
-            style={titleTransitionName} 
+            style={titleTransitionName}
 		>
 			{title}
 		</h3>
 
-		<!-- Description - No transition name -->
 		<p class="text-purple-100/90 mb-6 text-base md:text-lg max-w-xl">
 			{description}
 		</p>
 
-		<!-- META WRAPPER: Add transition name -->
 		<div
 			class="flex items-center text-sm text-purple-200/80 mb-6 uppercase font-semibold tracking-wider"
-            style={metaTransitionName} 
+            style={metaTransitionName}
 		>
 			<span>{author}</span>
 			<span class="mx-2">•</span>
 			<span>{formatDate(date)}</span>
 		</div>
 
-		<!-- Read Article Button - No transition name -->
 		<Button
 			href={`/post/${id}`}
 			class="bg-pills-pink text-black border-2 border-black rounded-none px-6 py-2 font-bold uppercase tracking-wider shadow-[2px_2px_0px_#000] hover:shadow-[3px_3px_0px_#000] hover:bg-pink-400 transition-all text-sm md:text-base"

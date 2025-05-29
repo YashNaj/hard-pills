@@ -116,3 +116,43 @@
   animation: fade-out 0.2s ease-out forwards;
   z-index: 0;
 }
+
+/* --- Apply base duration/easing to morphing groups --- */
+::view-transition-group(post-*-image),
+::view-transition-group(post-*-categories),
+::view-transition-group(post-*-title),
+::view-transition-group(post-*-meta) {
+  animation-duration: var(--vt-duration);
+  animation-timing-function: var(--vt-easing);
+}
+
+/* --- Staging using Delays (adjust if needed) --- */
+::view-transition-group(post-*-image) {
+  animation-delay: 0s;
+}
+::view-transition-group(post-*-categories),
+::view-transition-group(post-*-meta) {
+  animation-delay: 0.05s;
+}
+::view-transition-group(post-*-title) {
+  animation-delay: 0.1s;
+}
+
+/* --- Featured Post Content Fade-out --- */
+/* This targets the *outgoing* featured content area when navigating AWAY */
+::view-transition-old(featured-content-area) {
+  animation: fade-out 0.25s var(--vt-easing) forwards; /* Quick fade using standard easing */
+  /* We don't define ::view-transition-new(featured-content-area) because */
+  /* it doesn't exist on the target (article) page */
+}
+
+/* --- Article Content Fade-in --- */
+/* This targets the *incoming* article content block */
+::view-transition-new(post-*-content) {
+  animation: fade-in-delay 0.4s ease-out 0.15s forwards;
+  z-index: 1;
+}
+::view-transition-old(post-*-content) {
+  animation: fade-out 0.2s ease-out forwards;
+  z-index: 0;
+}
