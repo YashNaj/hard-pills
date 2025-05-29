@@ -55,6 +55,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		
 		// If no ID provided, return all posts (could add pagination later)
 		const posts = await getAllPosts();
+		console.log('API: Found posts:', posts.length);
 		return json({ posts });
 	} catch (error) {
 		console.error('Error fetching posts:', error);

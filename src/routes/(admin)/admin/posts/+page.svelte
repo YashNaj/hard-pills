@@ -20,22 +20,34 @@
 	let searchQuery = $state('');
 	let statusFilter = $state('all');
 	let filteredPosts = $derived(() => {
-		let posts = data.posts || [];
+		const posts = data.posts || [];
+		
+		if (!searchQuery.trim() && statusFilter === 'all') {
+			return posts;
+		}
+		
+		let filtered = posts;
 		
 		// Filter by search query
 		if (searchQuery.trim()) {
-			posts = posts.filter(post => 
-				post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				post.content.toLowerCase().includes(searchQuery.toLowerCase())
-			);
+			const query = searchQuery.toLowerCase().trim();
+			filtered = filtered.filter(post => {
+				const title = (post.title || '').toLowerCase();
+				const content = (post.content || '').toLowerCase();
+				const slug = (post.slug || '').toLowerCase();
+				
+				return title.includes(query) || 
+				       content.includes(query) || 
+				       slug.includes(query);
+			});
 		}
 		
 		// Filter by status
 		if (statusFilter !== 'all') {
-			posts = posts.filter(post => post.status === statusFilter);
+			filtered = filtered.filter(post => post.status === statusFilter);
 		}
 		
-		return posts;
+		return filtered;
 	});
 </script>
 
@@ -153,6 +165,12 @@
 			<CardTitle>All Posts</CardTitle>
 		</CardHeader>
 		<CardContent class="p-0">
+			<div class="p-4 bg-gray-100 text-sm">
+				DEBUG: Raw data.posts.length = {data.posts?.length || 0}<br>
+				DEBUG: filteredPosts.length = {filteredPosts.length}<br>
+				DEBUG: searchQuery = "{searchQuery}"<br>
+				DEBUG: statusFilter = "{statusFilter}"
+			</div>
 			{#if filteredPosts.length === 0}
 				<div class="p-8 text-center text-muted-foreground">
 					{#if searchQuery || statusFilter !== 'all'}
@@ -164,7 +182,7 @@
 			{:else}
 				<!-- We can reuse the PostsTable component but pass filtered data -->
 				<div class="overflow-auto">
-					<PostsTable posts={filteredPosts} />
+					<PostsTable posts={filteredPosts} showHeader={false} />
 				</div>
 			{/if}
 		</CardContent>

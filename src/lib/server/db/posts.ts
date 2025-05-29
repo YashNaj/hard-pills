@@ -1,14 +1,14 @@
-import { db } from '../../../db/index.js';
-import { posts } from '../../../../drizzle/schema';
-import { eq } from 'drizzle-orm';
-import type { User } from '@supabase/supabase-js';
+import { db } from "../../../db/index.js";
+import { posts } from "../../../../drizzle/schema";
+import { eq, desc } from "drizzle-orm";
+import type { User } from "@supabase/supabase-js";
 
 export interface CreatePostData {
 	title: string;
 	content: string;
 	slug: string;
 	author: string;
-	status?: 'draft' | 'scheduled' | 'published' | 'archived';
+	status?: "draft" | "scheduled" | "published" | "archived";
 	scheduledAt?: Date;
 	featured?: boolean;
 }
@@ -17,47 +17,54 @@ export interface UpdatePostData {
 	title?: string;
 	content?: string;
 	slug?: string;
-	status?: 'draft' | 'scheduled' | 'published' | 'archived';
+	status?: "draft" | "scheduled" | "published" | "archived";
 	scheduledAt?: Date;
 	featured?: boolean;
 }
 
 export async function createPost(data: CreatePostData) {
 	try {
-		const [post] = await db.insert(posts).values({
-			...data,
-			status: data.status || 'draft',
-			featured: data.featured || false
-		}).returning();
-		
+		const [post] = await db
+			.insert(posts)
+			.values({
+				...data,
+				status: data.status || "draft",
+				featured: data.featured || false,
+			})
+			.returning();
+
 		return post;
 	} catch (error: any) {
 		// For testing: if it's a foreign key constraint error, log but provide helpful message
-		if (error.code === '23503' && error.constraint_name === 'posts_author_fkey') {
-			console.error('Author UUID not found in auth.users table:', data.author);
-			throw new Error(`Author ID ${data.author} does not exist in the users table. Please use a valid user ID.`);
+		if (
+			error.code === "23503" &&
+			error.constraint_name === "posts_author_fkey"
+		) {
+			console.error("Author UUID not found in auth.users table:", data.author);
+			throw new Error(
+				`Author ID ${data.author} does not exist in the users table. Please use a valid user ID.`,
+			);
 		}
 		throw error;
 	}
 }
 
 export async function updatePost(id: string, data: UpdatePostData) {
-	const [post] = await db.update(posts)
+	const [post] = await db
+		.update(posts)
 		.set({
 			...data,
-			updatedAt: new Date().toISOString()
+			updatedAt: new Date().toISOString(),
 		})
 		.where(eq(posts.id, id))
 		.returning();
-	
+
 	return post;
 }
 
 export async function getPost(id: string) {
-	const [post] = await db.select()
-		.from(posts)
-		.where(eq(posts.id, id));
-	
+	const [post] = await db.select().from(posts).where(eq(posts.id, id));
+
 	return post;
 }
 
@@ -66,11 +73,10 @@ export async function deletePost(id: string) {
 }
 
 export async function getAllPosts() {
-	return db.select().from(posts).orderBy(posts.createdAt);
+	const result = await db.select().from(posts).orderBy(desc(posts.createdAt));
+	return result;
 }
 
 export async function getPublishedPosts() {
-	return db.select()
-		.from(posts)
-		.where(eq(posts.status, 'published'));
+	return db.select().from(posts).where(eq(posts.status, "published"));
 }
