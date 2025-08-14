@@ -73,8 +73,21 @@ export async function deletePost(id: string) {
 }
 
 export async function getAllPosts() {
-	const result = await db.select().from(posts).orderBy(desc(posts.createdAt));
-	return result;
+	console.log('📚 [DB] getAllPosts: Starting to fetch all posts...');
+	try {
+		const result = await db.select().from(posts).orderBy(desc(posts.createdAt));
+		console.log(`📚 [DB] getAllPosts: Successfully fetched ${result.length} posts`);
+		console.log('📚 [DB] getAllPosts: Posts data:', result.map(p => ({
+			id: p.id?.slice(0, 8) + '...',
+			title: p.title,
+			status: p.status,
+			createdAt: p.createdAt
+		})));
+		return result;
+	} catch (error) {
+		console.error('📚 [DB] getAllPosts: Database error:', error);
+		throw error;
+	}
 }
 
 export async function getPublishedPosts() {

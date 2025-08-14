@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import { type Handle } from "@sveltejs/kit";
+import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import {
   PUBLIC_SUPABASE_URL,
@@ -65,14 +65,37 @@ const supabase: Handle = async ({ event, resolve }) => {
 };
 
 const authGuard: Handle = async ({ event, resolve }) => {
-  // Handle public routes first
-  // Get session and user role
   const { session, user } = await event.locals.safeGetSession();
   event.locals.session = session;
-  // Allow POST requests to /auth
-  if (event.url.pathname === "/auth" && event.request.method === "POST") {
-    return resolve(event);
+  event.locals.user = user;
+
+  // Define protected routes (admin routes)
+  const isAdminRoute = event.url.pathname.startsWith('/admin');
+  
+  // Allow public routes
+  const isPublicRoute = 
+    event.url.pathname === '/' ||
+    event.url.pathname === '/auth' ||
+    event.url.pathname.startsWith('/post/') ||
+    event.url.pathname.startsWith('/api/auth');
+
+  // If accessing admin route without session, redirect to auth
+  if (isAdminRoute && !session) {
+    throw redirect(302, '/auth');
   }
+
+  // Additional verification for admin routes - ensure single user restriction
+  if (isAdminRoute && session && user) {
+    // Replace with your actual phone number
+    const ALLOWED_PHONE = '+19515883144';
+    
+    if (user.phone !== ALLOWED_PHONE) {
+      // Sign out unauthorized user
+      await event.locals.supabase.auth.signOut();
+      throw redirect(302, '/auth');
+    }
+  }
+
   return resolve(event);
 };
 

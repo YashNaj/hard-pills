@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async () => {
 	try {
 		const submissions = await getAllSubmissions();
-		
+
 		return {
 			submissions: submissions || [],
 			meta: {

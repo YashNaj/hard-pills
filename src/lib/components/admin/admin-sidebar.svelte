@@ -33,7 +33,7 @@
 			items: [
 				{
 					title: "Editor",
-					url: "/admin",
+					url: "/admin/editor",
 					icon: PenTool,
 					description: "Create and edit posts",
 				},
@@ -86,16 +86,16 @@
 </script>
 
 <Sidebar class="border-r">
-	<SidebarHeader class="border-b px-6 py-4">
+	<SidebarHeader class="border-b h-16">
 		<a
 			href="/"
-			class="flex items-center gap-3 hover:opacity-80 transition-opacity"
+			class="flex items-center gap-3 hover:opacity-80 h-full justify-center w-full transition-opacity"
 		>
 			<div class="flex h-full w-auto items-center justify-center">
 				<img
 					src={HardPillsLogo}
 					alt="Hard Pills Logo"
-					class="h-full w-full object-cover"
+					class="h-full w-full object-"
 				/>
 			</div>
 		</a>

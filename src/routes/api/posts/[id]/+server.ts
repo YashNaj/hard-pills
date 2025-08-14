@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { deletePost, getPost } from '$lib/server/db/posts.js';
+import { deletePost, getPost, updatePost } from '$lib/server/db/posts.js';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ params }) => {
@@ -20,6 +20,25 @@ export const GET: RequestHandler = async ({ params }) => {
 	} catch (error) {
 		console.error('Error fetching post:', error);
 		return json({ error: 'Failed to fetch post' }, { status: 500 });
+	}
+};
+
+export const PATCH: RequestHandler = async ({ params, request }) => {
+	try {
+		const { id } = params;
+		
+		if (!id) {
+			return json({ error: 'Post ID is required' }, { status: 400 });
+		}
+		
+		const updateData = await request.json();
+		
+		const updatedPost = await updatePost(id, updateData);
+		
+		return json({ post: updatedPost, message: 'Post updated successfully' });
+	} catch (error) {
+		console.error('Error updating post:', error);
+		return json({ error: 'Failed to update post' }, { status: 500 });
 	}
 };
 

@@ -1,98 +1,103 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Textarea } from '$lib/components/ui/textarea';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Select } from '$lib/components/ui/select';
-	import { PenTool, Plus, Loader2 } from 'lucide-svelte';
-	import { goto } from '$app/navigation';
-	
+	import { Button } from "$lib/components/ui/button";
+	import { Input } from "$lib/components/ui/input";
+	import { Label } from "$lib/components/ui/label";
+	import { Textarea } from "$lib/components/ui/textarea";
+	import {
+		Card,
+		CardContent,
+		CardHeader,
+		CardTitle,
+	} from "$lib/components/ui/card";
+	import { Select } from "$lib/components/ui/select";
+	import { PenTool, Plus, Loader2 } from "lucide-svelte";
+	import { goto } from "$app/navigation";
+
 	let { onPostCreated = () => {} } = $props<{ onPostCreated?: () => void }>();
-	
-	let title = $state('');
-	let slug = $state('');
-	let excerpt = $state('');
-	let status = $state('draft');
+
+	let title = $state("");
+	let slug = $state("");
+	let excerpt = $state("");
+	let status = $state("draft");
 	let featured = $state(false);
 	let isCreating = $state(false);
-	
+
 	// Mock user ID for testing
-	const authorId = '22ae43cd-bfb8-426c-a3b0-5398be3dc93a';
-	
+	const authorId = "22ae43cd-bfb8-426c-a3b0-5398be3dc93a";
+
 	function generateSlug() {
 		slug = title
 			.toLowerCase()
-			.replace(/[^\w\s-]/g, '')
-			.replace(/\s+/g, '-')
-			.replace(/-+/g, '-')
+			.replace(/[^\w\s-]/g, "")
+			.replace(/\s+/g, "-")
+			.replace(/-+/g, "-")
 			.trim();
 	}
-	
+
 	async function createPost() {
 		if (!title || !slug) {
-			alert('Please enter a title and slug');
+			alert("Please enter a title and slug");
 			return;
 		}
-		
+
 		isCreating = true;
-		
+
 		try {
-			const response = await fetch('/api/posts', {
-				method: 'POST',
+			const response = await fetch("/api/posts", {
+				method: "POST",
 				headers: {
-					'Content-Type': 'application/json',
+					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
 					title,
 					slug,
-					content: excerpt || '<p>Start writing your post...</p>',
+					content: excerpt || "<p>Start writing your post...</p>",
 					author: authorId,
 					status,
-					featured
-				})
+					featured,
+				}),
 			});
-			
+
 			if (response.ok) {
 				const { post } = await response.json();
-				
+
 				// Reset form
-				title = '';
-				slug = '';
-				excerpt = '';
-				status = 'draft';
+				title = "";
+				slug = "";
+				excerpt = "";
+				status = "draft";
 				featured = false;
-				
+
 				// Callback to refresh posts table
 				onPostCreated();
-				
+
 				// Navigate to editor
-				goto(`/admin?edit=${post.id}`);
+				goto(`/admin/editor/${post.id}`);
 			} else {
-				throw new Error('Failed to create post');
+				throw new Error("Failed to create post");
 			}
 		} catch (error) {
-			console.error('Error creating post:', error);
-			alert('Failed to create post');
+			console.error("Error creating post:", error);
+			alert("Failed to create post");
 		} finally {
 			isCreating = false;
 		}
 	}
-	
+
 	async function createAndEdit() {
 		await createPost();
 	}
-	
+
 	function quickCreate() {
 		if (!title) {
-			alert('Please enter a title');
+			alert("Please enter a title");
 			return;
 		}
-		
+
 		if (!slug) {
 			generateSlug();
 		}
-		
+
 		createPost();
 	}
 </script>
@@ -117,7 +122,7 @@
 					disabled={isCreating}
 				/>
 			</div>
-			
+
 			<div class="space-y-2">
 				<Label for="new-slug">Slug</Label>
 				<Input
@@ -128,7 +133,7 @@
 				/>
 			</div>
 		</div>
-		
+
 		<!-- Excerpt -->
 		<div class="space-y-2">
 			<Label for="excerpt">Excerpt (Optional)</Label>
@@ -140,7 +145,7 @@
 				disabled={isCreating}
 			/>
 		</div>
-		
+
 		<!-- Post Options -->
 		<div class="space-y-4">
 			<div class="space-y-2">
@@ -156,7 +161,7 @@
 					<option value="scheduled">Scheduled</option>
 				</select>
 			</div>
-			
+
 			<div class="flex items-center space-x-2">
 				<input
 					type="checkbox"
@@ -165,15 +170,13 @@
 					disabled={isCreating}
 					class="h-4 w-4 rounded border-gray-300"
 				/>
-				<Label for="featured" class="text-sm font-normal">
-					Featured post
-				</Label>
+				<Label for="featured" class="text-sm font-normal">Featured post</Label>
 			</div>
 		</div>
-		
+
 		<!-- Action Buttons -->
 		<div class="space-y-3">
-			<Button 
+			<Button
 				onclick={createAndEdit}
 				disabled={!title || !slug || isCreating}
 				class="w-full"
@@ -186,8 +189,8 @@
 					Create & Edit
 				{/if}
 			</Button>
-			
-			<Button 
+
+			<Button
 				variant="outline"
 				onclick={quickCreate}
 				disabled={!title || isCreating}
@@ -196,11 +199,16 @@
 				Quick Create
 			</Button>
 		</div>
-		
+
 		<!-- Help Text -->
 		<div class="text-xs text-muted-foreground space-y-1">
-			<p><strong>Create & Edit:</strong> Creates the post and opens the editor</p>
-			<p><strong>Quick Create:</strong> Creates the post and stays on dashboard</p>
+			<p>
+				<strong>Create & Edit:</strong> Creates the post and opens the editor
+			</p>
+			<p>
+				<strong>Quick Create:</strong> Creates the post and stays on dashboard
+			</p>
 		</div>
 	</CardContent>
 </Card>
+

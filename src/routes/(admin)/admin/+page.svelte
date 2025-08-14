@@ -2,6 +2,8 @@
 	import TipTap from '$lib/components/admin/tip-tap.svelte';
 	import SubmissionsTable from '$lib/components/admin/submissions-table.svelte';
 	import PostCreationForm from '$lib/components/admin/post-creation-form.svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { Plus } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	
@@ -51,39 +53,28 @@
 		content = '';
 		goto('/admin', { replaceState: true });
 	}
+
+	let isEditMode= $derived(showEditor && postId ? true : false);
+	$inspect(isEditMode)
+
+	$effect(() => {
+		if (isEditMode && postId) {
+			goto(`/admin/editor/${postId}`, { replaceState: true });
+		}
+	});
 </script>
 
-{#if showEditor && postId}
-	<!-- Editor View -->
-	<div class="max-w-6xl mx-auto">
-		<div class="mb-6 flex items-center justify-between">
-			<h1 class="text-3xl font-bold">Edit Post</h1>
-			<button
-				onclick={backToDashboard}
-				class="text-sm text-muted-foreground hover:text-foreground"
-			>
-				← Back to Dashboard
-			</button>
-		</div>
-		
-		<div class="border rounded-lg">
-			<TipTap
-				{postId}
-				{title}
-				{slug}
-				author={authorId}
-				initialContent={content}
-				onUpdate={(newContent) => content = newContent}
-				supabase={data.supabase}
-			/>
-		</div>
-	</div>
-{:else}
-	<!-- Dashboard View -->
+<!-- Dashboard View -->
 	<div class="space-y-6">
 		<div class="flex items-center justify-between">
-			<h1 class="text-3xl font-bold">Dashboard</h1>
-			<p class="text-muted-foreground">Manage your content</p>
+			<div>
+				<h1 class="text-3xl font-bold">Dashboard</h1>
+				<p class="text-muted-foreground">Manage your content</p>
+			</div>
+			<Button onclick={() => goto('/admin/editor')} class="gap-2">
+				<Plus class="w-4 h-4" />
+				New Post
+			</Button>
 		</div>
 		
 		<!-- Split Layout: Submissions Table | Post Creation -->
@@ -101,4 +92,3 @@
 			</div>
 		</div>
 	</div>
-{/if}

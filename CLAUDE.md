@@ -42,3 +42,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Be critical of implementation suggestions and reference Supabase docs
 - Require complete Supabase context before implementing major features
 - Follow existing RLS policies for data access
+- SyntaxError: The requested module '/src/lib/components/ui/select/index.ts' does not provide an export named 'SelectValue' (at +page.svelte:9:61) look up shadcn svelte 5 docs, you are doing something wrong

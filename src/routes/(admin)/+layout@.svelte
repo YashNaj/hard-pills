@@ -19,13 +19,10 @@
 
 <style>
 	/* Override global Bangers font for admin routes only */
-	:global(.admin-layout) {
+	:global(.admin-layout *) {
 		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 	}
 	
-	:global(.admin-layout *) {
-		font-family: inherit;
-	}
 	
 	/* Ensure all text elements use the system font */
 	:global(.admin-layout h1, .admin-layout h2, .admin-layout h3, .admin-layout h4, .admin-layout h5, .admin-layout h6) {

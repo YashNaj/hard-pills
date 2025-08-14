@@ -2,7 +2,7 @@
 
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { getPostById } from "$lib/data/posts"; // Uses the function from your file
+import { getPostById } from "$lib/data/posts"; // Uses the function from your fil
 
 export const load: PageServerLoad = ({ params }) => {
   const postId = params.id;
