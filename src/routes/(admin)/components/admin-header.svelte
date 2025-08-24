@@ -29,7 +29,7 @@
 	}
 </script>
 
-<header class="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 left-0 bg-pills-pink z-[10]">
+<header class="flex h-16 shrink-0 items-center gap-2 border-b px-4 font-snas sticky top-0 left-0 bg-pills-pink z-[10]">
 	<SidebarTrigger class="-ml-1" />
 	
 	<div class="flex items-center gap-2">

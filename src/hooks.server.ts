@@ -73,12 +73,11 @@ const authGuard: Handle = async ({ event, resolve }) => {
   // Allow public routes
   const isPublicRoute =
     event.url.pathname === "/" ||
-    event.url.pathname === "/auth" ||
     event.url.pathname.startsWith("/post/") ||
     event.url.pathname.startsWith("/api/auth");
 
   // If accessing admin route without session, redirect to auth
-  if (isAdminRoute && !session) {
+  if ((isAdminRoute && !session) || isPublicRoute) {
     throw redirect(302, "/auth");
   }
 

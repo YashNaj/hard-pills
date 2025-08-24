@@ -85,7 +85,7 @@
 	}
 </script>
 
-<Sidebar class="border-r">
+<Sidebar class="border-r font-sans">
 	<SidebarHeader class="border-b h-16 bg-pills-pink">
 		<a
 			href="/"

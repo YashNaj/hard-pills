@@ -14,6 +14,7 @@
 	let submissions = $state<any[]>([]);
 	let isLoading = $state(true);
 	let searchTerm = $state('');
+	let isCreatingPost = $state(false);
 	
 	const filteredPosts = $derived(
 		posts?.filter(post => 
@@ -66,16 +67,18 @@
 	});
 
 	async function createNewPost() {
-		const now = new Date();
-		const timestamp = now.toLocaleString('en-US', {
-			month: 'short',
-			day: 'numeric', 
-			year: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
-		});
+		isCreatingPost = true;
 		
 		try {
+			const now = new Date();
+			const timestamp = now.toLocaleString('en-US', {
+				month: 'short',
+				day: 'numeric', 
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit'
+			});
+			
 			const response = await fetch('/api/posts', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -84,7 +87,8 @@
 					slug: `new-post-${Date.now()}`,
 					content: '<p>Start writing your post here...</p>',
 					status: 'draft',
-					featured: false
+					featured: false,
+					author: '22ae43cd-bfb8-426c-a3b0-5398be3dc93a'
 				})
 			});
 			
@@ -96,6 +100,8 @@
 			}
 		} catch (error) {
 			console.error('Error creating new post:', error);
+		} finally {
+			isCreatingPost = false;
 		}
 	}
 	
@@ -203,9 +209,14 @@
 				</CardHeader>
 				<CardContent class="pt-2">
 					<div class="flex flex-col sm:flex-row gap-4 justify-center">
-						<Button onclick={createNewPost} size="lg" class="flex-1 sm:flex-none">
-							<FileText class="w-4 h-4 mr-2" />
-							New Blank Post
+						<Button onclick={createNewPost} size="lg" class="flex-1 sm:flex-none" disabled={isCreatingPost}>
+							{#if isCreatingPost}
+								<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+								Creating Post...
+							{:else}
+								<FileText class="w-4 h-4 mr-2" />
+								New Blank Post
+							{/if}
 						</Button>
 					</div>
 				</CardContent>

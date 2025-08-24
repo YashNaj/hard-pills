@@ -84,7 +84,7 @@
 	// --- End View Transition Setup ---
 </script>
 
-<article class="w-screen mb-16">
+<article class="w-screen mb-16 ">
 
 	<div class = 'h-fit'>
 
@@ -122,7 +122,7 @@
 
 			<!-- TITLE: Add transition name -->
 			<h1
-				class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 uppercase text-black font-heading"
+				class="text-4xl md:text-5xl font-bangers font-extrabold tracking-tight mb-4 uppercase text-black font-heading"
 				style={titleTransitionName}
 			>
 				{post.title}

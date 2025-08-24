@@ -13,12 +13,7 @@ export const load: PageServerLoad = async () => {
       })
       .from(posts)
       .leftJoin(postImages, eq(posts.headerImageId, postImages.id))
-      .where(
-        and(
-          eq(posts.status, "published"),
-          eq(posts.featured, true),
-        ),
-      )
+      .where(and(eq(posts.status, "published"), eq(posts.featured, true)))
       .orderBy(desc(posts.createdAt))
       .limit(1);
 

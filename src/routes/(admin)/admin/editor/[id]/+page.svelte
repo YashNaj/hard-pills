@@ -165,18 +165,33 @@
 <div class="min-h-full mt-6 overflow-auto px-6 bg-background ">
 	<!-- Modern Header with Glass Effect -->
 	<div class="z-[9] border-b sticky-top-0">
-		<div class="container flex h-16 w-full relative items-center justify-between ">
-			<div class="flex items-center gap-4">
-				<Button variant="ghost" size="sm" onclick={backToDashboard} class="text-muted-foreground hover:text-foreground">
-					← Back
-				</Button>
-				<div class="flex flex-col">
-					<h1 class="text-lg font-semibold">Edit Post</h1>
-					<p class="text-sm text-muted-foreground">ID: {postId.slice(0, 8)}...</p>
-				</div>
+		<div class="container flex h-16 w-full items-center gap-4">
+			<Button variant="ghost" size="sm" onclick={backToDashboard} class="text-muted-foreground hover:text-foreground flex-shrink-0">
+				← Back
+			</Button>
+			
+			<!-- Title Input - Takes most space -->
+			<div class="flex-1 min-w-0">
+				<Input
+					id="title"
+					bind:value={title}
+					placeholder="Enter your post title..."
+					class="text-lg font-semibold bg-transparent border-none shadow-none px-2 h-12 focus:bg-background focus:border-border focus:shadow-sm transition-all"
+				/>
 			</div>
 			
-			<div class="flex items-center gap-2">
+			<!-- Slug Input - Compact -->
+			<div class="flex items-center gap-1 text-sm flex-shrink-0">
+				<span class="text-muted-foreground font-mono text-xs">/post/</span>
+				<Input
+					id="slug"
+					bind:value={slug}
+					placeholder="url-slug"
+					class="font-mono text-xs h-8 w-24 focus:w-32 transition-all duration-200 bg-muted/50 border-muted-foreground/20"
+				/>
+			</div>
+			
+			<div class="flex items-center gap-2 flex-shrink-0">
 				<Badge variant={status === 'published' ? 'default' : status === 'scheduled' ? 'secondary' : 'outline'}>
 					{status.charAt(0).toUpperCase() + status.slice(1)}
 				</Badge>
@@ -236,38 +251,13 @@
 		</div>
 	</div>
 
-	<!-- Full-Width Editor Layout -->
-	<div class="h-full flex flex-col -m-6 -mt-0">
-		<!-- Compact Title Bar -->
-		<div class="bg-background/95 backdrop-blur-sm border-b border-border px-6 py-3 flex-shrink-0">
-			<div class="flex items-center gap-6">
-				<!-- Title Input - Takes most space -->
-				<div class="flex-1 min-w-0">
-					<Input
-						id="title"
-						bind:value={title}
-						placeholder="Enter your post title..."
-						class="text-lg font-semibold border-none shadow-none bg-transparent px-0 h-10 focus:ring-0 focus-visible:ring-0"
-					/>
-				</div>
-				
-				<!-- Slug Input - Compact -->
-				<div class="flex items-center gap-2 text-sm">
-					<span class="text-muted-foreground font-mono">/post/</span>
-					<Input
-						id="slug"
-						bind:value={slug}
-						placeholder="url-slug"
-						class="font-mono text-sm h-8 w-32 border border-border/50 bg-muted/30 px-2 focus:w-48 transition-all duration-200"
-					/>
-				</div>
-			</div>
-		</div>
+	<!-- Main Editor Content -->
+	<div class="flex-1 flex flex-col overflow-hidden">
 
-		<!-- Main Content Area with Editor and Embedded Sidebar -->
+		<!-- Editor and Sidebar Container -->
 		<div class="flex-1 flex overflow-hidden">
 			<!-- Rich Text Editor -->
-			<div class="flex-1 bg-background transition-all duration-500 ease-out">
+			<div class="flex-1 bg-background transition-all duration-500 ease-out overflow-hidden">
 				<TipTap
 					{postId}
 					{title}
