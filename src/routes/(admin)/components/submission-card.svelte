@@ -124,69 +124,81 @@
 	};
 </script>
 
-<Card class="hover:shadow-md transition-all duration-200 {urgencyStyles[urgency]}">
-	<CardHeader class="pb-3">
-		<div class="flex items-start justify-between gap-2">
+<Card class="hover:shadow-md transition-all duration-200 {urgencyStyles[urgency]} flex flex-col h-full">
+	<CardHeader class="pb-2 flex-shrink-0">
+		<!-- Header with title and badges -->
+		<div class="flex items-start justify-between gap-3">
 			<div class="flex-1 min-w-0">
-				<CardTitle class="text-base line-clamp-2 flex items-center gap-2">
-					<MessageSquare class="w-4 h-4 text-primary flex-shrink-0" />
-					{submission.subject || 'No subject'}
+				<CardTitle class="text-sm font-semibold line-clamp-2 flex items-start gap-2 leading-tight">
+					<MessageSquare class="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+					<span>{submission.subject || 'No subject'}</span>
 				</CardTitle>
-				<CardDescription class="mt-2">
-					<div class="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-						<div class="flex items-center gap-1">
-							<User class="w-3 h-3" />
-							<span>{submission.name || 'Anonymous'}</span>
-						</div>
-						{#if submission.email}
-							<div class="flex items-center gap-1">
-								<Mail class="w-3 h-3" />
-								<span class="truncate max-w-32">{submission.email}</span>
-							</div>
-						{/if}
-						<div class="flex items-center gap-1">
-							<Calendar class="w-3 h-3" />
-							<span>{submission.createdAt ? formatDate(submission.createdAt) : 'Unknown date'}</span>
-						</div>
-					</div>
-					<p class="line-clamp-4 text-sm leading-relaxed">
-						{submission.content || 'No content'}
-					</p>
-				</CardDescription>
 			</div>
-			
-			<div class="flex flex-col gap-2 items-end">
-				<Badge variant={getStatusVariant(submission.status || 'pending')} class="text-xs">
+			<div class="flex flex-col gap-1 items-end flex-shrink-0">
+				<Badge variant={getStatusVariant(submission.status || 'pending')} class="text-xs h-5">
 					{(submission.status || 'pending').charAt(0).toUpperCase() + (submission.status || 'pending').slice(1)}
 				</Badge>
-				
 				{#if urgency === 'high'}
-					<Badge variant="destructive" class="text-xs">
-						High Priority
+					<Badge variant="destructive" class="text-xs h-5">
+						Urgent
 					</Badge>
 				{:else if urgency === 'medium'}
-					<Badge variant="secondary" class="text-xs">
-						Medium Priority  
+					<Badge variant="secondary" class="text-xs h-5">
+						Priority
 					</Badge>
 				{/if}
 			</div>
 		</div>
+		
+		<!-- Metadata row -->
+		<div class="flex items-center gap-3 text-xs text-muted-foreground mt-2 flex-wrap">
+			<div class="flex items-center gap-1 flex-shrink-0">
+				<User class="w-3 h-3" />
+				<span class="truncate max-w-20">{submission.name || 'Anonymous'}</span>
+			</div>
+			<div class="flex items-center gap-1 flex-shrink-0">
+				<Calendar class="w-3 h-3" />
+				<span>{submission.createdAt ? new Date(submission.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Unknown'}</span>
+			</div>
+			{#if submission.email}
+				<div class="flex items-center gap-1 flex-shrink-0">
+					<Mail class="w-3 h-3" />
+					<span class="truncate max-w-24 text-xs">{submission.email}</span>
+				</div>
+			{/if}
+		</div>
 	</CardHeader>
 	
-	<CardContent class="pt-0">
-		<div class="flex gap-2">
+	<!-- Content area - grows to fill space -->
+	<CardContent class="pt-0 pb-3 flex-1 flex flex-col">
+		<div class="flex-1">
+			<p class="text-xs leading-relaxed text-muted-foreground line-clamp-4">
+				{submission.content || 'No content'}
+			</p>
+		</div>
+	
+		
+		<!-- High priority warning -->
+		{#if urgency === 'high'}
+			<div class="mt-2 p-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded text-xs text-red-700 dark:text-red-300">
+				⚠️ May require immediate attention
+			</div>
+		{/if}
+		
+		<!-- Action buttons - always at bottom -->
+		<div class="flex gap-1.5 mt-3 pt-2 border-t border-border/50">
 			<Button 
 				size="sm" 
 				onclick={createResponsePost}
 				disabled={isCreatingResponse}
-				class="flex-1"
+				class="flex-1 h-8 text-xs"
 			>
 				{#if isCreatingResponse}
-					<div class="animate-spin rounded-full h-3 w-3 border-b border-current mr-2"></div>
-					Creating Response...
+					<div class="animate-spin rounded-full h-3 w-3 border-b border-current mr-1.5"></div>
+					Creating...
 				{:else}
-					<Edit class="w-3 h-3 mr-2" />
-					Respond to This
+					<Edit class="w-3 h-3 mr-1.5" />
+					Respond
 				{/if}
 			</Button>
 			
@@ -195,7 +207,8 @@
 					variant="outline" 
 					size="sm"
 					onclick={() => window.open(`mailto:${submission.email}?subject=Re: ${submission.subject || 'Your submission'}`)}
-					class="flex-shrink-0"
+					class="w-8 h-8 p-0"
+					title="Send email"
 				>
 					<ExternalLink class="w-3 h-3" />
 				</Button>
@@ -227,7 +240,8 @@
 						variant="outline" 
 						size="sm"
 						disabled={isDeleting}
-						class="flex-shrink-0 text-destructive hover:text-destructive"
+						class="w-8 h-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+						title="Delete submission"
 					>
 						{#if isDeleting}
 							<div class="animate-spin rounded-full h-3 w-3 border-b border-current"></div>
@@ -238,11 +252,5 @@
 				</form>
 			{/if}
 		</div>
-		
-		{#if urgency === 'high'}
-			<div class="mt-3 p-2 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-xs text-red-800 dark:text-red-200">
-				⚠️ This submission may require immediate attention due to urgent language or sensitive content.
-			</div>
-		{/if}
 	</CardContent>
 </Card>
