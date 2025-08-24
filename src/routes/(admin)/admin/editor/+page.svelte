@@ -6,6 +6,7 @@
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Plus, Edit, FileText, MessageSquare, Calendar, User, Search, Clock, CheckCircle } from 'lucide-svelte';
+	import SubmissionCard from '../../components/submission-card.svelte';
 
 	let { data } = $props();
 	
@@ -230,39 +231,15 @@
 						<h2 class="text-xl font-semibold">Reader Submissions</h2>
 						<Badge variant="secondary">{pendingSubmissions.length}</Badge>
 					</div>
-					<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+					<div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
 						{#each pendingSubmissions as submission}
-							<Card class="hover:shadow-md transition-shadow">
-								<CardHeader class="pb-3">
-									<div class="flex items-start justify-between gap-2">
-										<CardTitle class="text-base line-clamp-2">
-											{submission.subject || 'No subject'}
-										</CardTitle>
-										<Badge variant="outline" class="shrink-0">
-											{submission.status || 'pending'}
-										</Badge>
-									</div>
-									<CardDescription class="text-sm">
-										<div class="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-											<User class="w-3 h-3" />
-											{submission.name || 'Anonymous'} • {submission.createdAt ? formatDate(submission.createdAt) : 'Unknown date'}
-										</div>
-										<p class="line-clamp-3">
-											{submission.content || 'No content'}
-										</p>
-									</CardDescription>
-								</CardHeader>
-								<CardContent class="pt-0">
-									<Button 
-										size="sm" 
-										class="w-full" 
-										onclick={() => submission.id && createPostFromSubmission(submission.id)}
-									>
-										<Edit class="w-4 h-4 mr-2" />
-										Respond to This
-									</Button>
-								</CardContent>
-							</Card>
+							<SubmissionCard 
+								{submission} 
+								onDelete={(id) => {
+									// Remove from submissions array
+									submissions = submissions.filter(s => s.id !== id);
+								}}
+							/>
 						{/each}
 					</div>
 				</div>
