@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SubmissionsTable from '$lib/components/admin/submissions-table.svelte';
+	import SubmissionsTable from '../../components/submissions-table.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';

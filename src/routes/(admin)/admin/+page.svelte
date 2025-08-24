@@ -1,7 +1,7 @@
 <script lang='ts'>
-	import TipTap from '$lib/components/admin/tip-tap.svelte';
-	import SubmissionsTable from '$lib/components/admin/submissions-table.svelte';
-	import PostCreationForm from '$lib/components/admin/post-creation-form.svelte';
+	import TipTap from '../components/tip-tap.svelte';
+	import SubmissionsTable from '../components/submissions-table.svelte';
+	import PostCreationForm from '../components/post-creation-form.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Plus } from 'lucide-svelte';
 	import { onMount } from 'svelte';

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Submit from "./submit.svelte";
+  import SubmitForm from "./components/submit-form.svelte";
 </script>
 
 <div class="w-full h-full">
-  <Submit />
+  <SubmitForm />
 </div>

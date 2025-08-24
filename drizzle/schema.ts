@@ -49,9 +49,10 @@ export const oneTimeTokenTypeInAuth = auth.enum("one_time_token_type", [
 	"email_change_token_current",
 	"phone_change_token",
 ]);
+
 export const postStatus = pgEnum("post_status", [
 	"draft",
-	"scheduled",
+	"scheduled", 
 	"published",
 	"archived",
 ]);
@@ -377,7 +378,6 @@ export const posts = pgTable(
 		title: text().notNull(),
 		content: text().notNull(),
 		slug: text().notNull(),
-		published: boolean().default(false).notNull(),
 		author: uuid().notNull(),
 		updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
 		submissionId: uuid("submission_id"),

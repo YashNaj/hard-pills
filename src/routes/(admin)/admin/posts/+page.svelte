@@ -55,7 +55,7 @@
 	}
 </script>
 
-<div class="space-y-6">
+<div class="space-y-6 px-6 py-2">
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<div>
@@ -166,7 +166,7 @@
 								</Button>
 								
 								{#if post.status === 'published'}
-									<Button href="/post/{post.id}" target="_blank" variant="outline" size="sm">
+									<Button href="/post/{post.slug}" target="_blank" variant="outline" size="sm">
 										<Eye class="h-4 w-4 mr-1" />
 										View
 									</Button>

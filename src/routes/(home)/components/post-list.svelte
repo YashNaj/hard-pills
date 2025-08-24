@@ -9,7 +9,7 @@
 <div class="space-y-8">
   {#each posts as post (post.id)}
     <PostCard
-      id={post.id}
+      slug={post.slug}
       title={post.title}
       description={post.description}
       author={post.author}

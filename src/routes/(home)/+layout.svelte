@@ -9,9 +9,9 @@
   import "../../view-transition.css";
   import { getTheme } from "$lib/theme.svelte";
   import HardPillsLogo from "$lib/assets/hard_pills.png";
-  import MobileDrawer from "./mobile-drawer.svelte";
-  import DesktopNav from "./desktop-nav.svelte";
-  import Footer from "./footer.svelte";
+  import MobileDrawer from "./components/navigation/mobile-drawer.svelte";
+  import DesktopNav from "./components/navigation/desktop-nav.svelte";
+  import Footer from "./components/navigation/footer.svelte";
 
   let { data, children } = $props();
 
@@ -54,10 +54,10 @@
   // --- End View Transition Integration ---
 </script>
 
-<div class="flex flex-col min-h-screen">
+<div class="flex flex-col min-h-dvh">
   <header
     style="view-transition-name:header"
-    class="z-[49] bg-pills-pink flex justify-between
+    class="z-[49] bg-pills-pink flex font-bangers justify-between
 
     h-20 place-items-center fixed w-full"
   >

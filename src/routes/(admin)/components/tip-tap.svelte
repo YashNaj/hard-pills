@@ -167,26 +167,109 @@
 
 </script>
 
-<div class="tiptap-editor-wrapper border border-border rounded-lg overflow-hidden">
+<div class="tiptap-editor-wrapper h-full flex flex-col">
 	{#if editor}
-		<!-- Toolbar (remains the same) -->
-		<div class="toolbar bg-muted/50 border-b border-border p-2 flex flex-wrap gap-1 sticky top-0 z-10">
+		<!-- Minimal Toolbar -->
+		<div class="toolbar bg-background/95 backdrop-blur-sm border-b border-border p-3 flex flex-wrap gap-2 sticky top-0 z-[9] shrink-0">
             <!-- ... toolbar buttons ... -->
-            <ToggleGroup type="multiple" size="sm" class="flex-wrap">
-                <ToggleGroupItem value="bold" aria-label="Toggle bold" data-state={editor.isActive('bold') ? 'on' : 'off'} on:click={() => editor.chain().focus().toggleBold().run()}><Bold class="h-4 w-4" /></ToggleGroupItem>
-                <ToggleGroupItem value="italic" aria-label="Toggle italic" data-state={editor.isActive('italic') ? 'on' : 'off'} on:click={() => editor.chain().focus().toggleItalic().run()}><Italic class="h-4 w-4" /></ToggleGroupItem>
-            </ToggleGroup>
-            <ToggleGroup type="single" size="sm" class="flex-wrap">
-                 <ToggleGroupItem value="heading2" aria-label="Toggle H2" data-state={editor.isActive('heading', { level: 2 }) ? 'on' : 'off'} on:click={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 class="h-4 w-4" /></ToggleGroupItem>
-                 <ToggleGroupItem value="heading3" aria-label="Toggle H3" data-state={editor.isActive('heading', { level: 3 }) ? 'on' : 'off'} on:click={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}><Heading3 class="h-4 w-4" /></ToggleGroupItem>
-                 <ToggleGroupItem value="heading4" aria-label="Toggle H4" data-state={editor.isActive('heading', { level: 4 }) ? 'on' : 'off'} on:click={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}><Heading4 class="h-4 w-4" /></ToggleGroupItem>
-            </ToggleGroup>
-            <ToggleGroup type="multiple" size="sm" class="flex-wrap">
-                 <ToggleGroupItem value="bulletList" aria-label="Toggle bullet list" data-state={editor.isActive('bulletList') ? 'on' : 'off'} on:click={() => editor.chain().focus().toggleBulletList().run()}><List class="h-4 w-4" /></ToggleGroupItem>
-                 <ToggleGroupItem value="orderedList" aria-label="Toggle ordered list" data-state={editor.isActive('orderedList') ? 'on' : 'off'} on:click={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered class="h-4 w-4" /></ToggleGroupItem>
-            </ToggleGroup>
-            <Button variant="ghost" size="sm" on:click={setLink} disabled={!editor.can().setLink({ href: '' })} data-active={editor.isActive('link') ? 'is-active' : undefined}><LinkIcon class="h-4 w-4" /></Button>
-            <Button variant="ghost" size="sm" on:click={() => document.getElementById('image-upload-input')?.click()} disabled={isUploading}><ImagePlus class="h-4 w-4" /></Button>
+            <!-- Text Formatting Buttons -->
+            <div class="flex items-center gap-1">
+                <Button 
+                    variant={editor.isActive('bold') ? 'default' : 'ghost'} 
+                    size="sm" 
+                    onclick={() => editor.chain().focus().toggleBold().run()}
+                    class="h-8 w-8 p-0"
+                    aria-label="Toggle bold"
+                >
+                    <Bold class="h-4 w-4" />
+                </Button>
+                <Button 
+                    variant={editor.isActive('italic') ? 'default' : 'ghost'} 
+                    size="sm" 
+                    onclick={() => editor.chain().focus().toggleItalic().run()}
+                    class="h-8 w-8 p-0"
+                    aria-label="Toggle italic"
+                >
+                    <Italic class="h-4 w-4" />
+                </Button>
+            </div>
+            
+            <!-- Heading Buttons -->
+            <div class="flex items-center gap-1 border-l border-border pl-2 ml-2">
+                <Button 
+                    variant={editor.isActive('heading', { level: 2 }) ? 'default' : 'ghost'} 
+                    size="sm" 
+                    onclick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                    class="h-8 w-8 p-0"
+                    aria-label="Toggle H2"
+                >
+                    <Heading2 class="h-4 w-4" />
+                </Button>
+                <Button 
+                    variant={editor.isActive('heading', { level: 3 }) ? 'default' : 'ghost'} 
+                    size="sm" 
+                    onclick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                    class="h-8 w-8 p-0"
+                    aria-label="Toggle H3"
+                >
+                    <Heading3 class="h-4 w-4" />
+                </Button>
+                <Button 
+                    variant={editor.isActive('heading', { level: 4 }) ? 'default' : 'ghost'} 
+                    size="sm" 
+                    onclick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+                    class="h-8 w-8 p-0"
+                    aria-label="Toggle H4"
+                >
+                    <Heading4 class="h-4 w-4" />
+                </Button>
+            </div>
+            
+            <!-- List Buttons -->
+            <div class="flex items-center gap-1 border-l border-border pl-2 ml-2">
+                <Button 
+                    variant={editor.isActive('bulletList') ? 'default' : 'ghost'} 
+                    size="sm" 
+                    onclick={() => editor.chain().focus().toggleBulletList().run()}
+                    class="h-8 w-8 p-0"
+                    aria-label="Toggle bullet list"
+                >
+                    <List class="h-4 w-4" />
+                </Button>
+                <Button 
+                    variant={editor.isActive('orderedList') ? 'default' : 'ghost'} 
+                    size="sm" 
+                    onclick={() => editor.chain().focus().toggleOrderedList().run()}
+                    class="h-8 w-8 p-0"
+                    aria-label="Toggle ordered list"
+                >
+                    <ListOrdered class="h-4 w-4" />
+                </Button>
+            </div>
+            
+            <!-- Link and Image Buttons -->
+            <div class="flex items-center gap-1 border-l border-border pl-2 ml-2">
+                <Button 
+                    variant={editor.isActive('link') ? 'default' : 'ghost'} 
+                    size="sm" 
+                    onclick={setLink} 
+                    disabled={!editor.can().setLink({ href: '' })} 
+                    class="h-8 w-8 p-0"
+                    aria-label="Add link"
+                >
+                    <LinkIcon class="h-4 w-4" />
+                </Button>
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onclick={() => document.getElementById('image-upload-input')?.click()} 
+                    disabled={isUploading}
+                    class="h-8 w-8 p-0"
+                    aria-label="Add image"
+                >
+                    <ImagePlus class="h-4 w-4" />
+                </Button>
+            </div>
             <input type="file" id="image-upload-input" accept="image/*" multiple class="hidden" onchange={addImageViaInput} />
             {#if isUploading} <span class="text-sm text-muted-foreground ml-2">Uploading...</span> {/if}
             {#if uploadError} <span class="text-sm text-destructive ml-2">{uploadError}</span> {/if}
@@ -207,10 +290,10 @@
 	{/if}
 
 	<!-- Editor Host Element -->
-	<!-- Use bind:this to get the DOM node -->
-	<div bind:this={editorElement}>
-		<!-- Tiptap will render its ProseMirror view inside this div -->
-        <!-- No need for <EditorContent> component -->
+	<div class="flex-1 overflow-auto">
+		<div bind:this={editorElement} class="h-full min-h-[500px]">
+			<!-- Tiptap will render its ProseMirror view inside this div -->
+		</div>
 	</div>
 </div>
 
@@ -218,11 +301,15 @@
 <style>
     /* Use :global(.ProseMirror) to target the actual editor element Tiptap creates */
     :global(.ProseMirror) {
-        font-family: system-ui, -apple-system, sans-serif; /* Built-in system font */
-        min-height: 300px;
-        padding: 1rem; /* Add padding directly here */
-        outline: none; /* Remove default outline */
-        line-height: 1.6;
+        font-family: system-ui, -apple-system, sans-serif;
+        min-height: 500px;
+        height: 100%;
+        padding: 2rem 3rem; /* Better padding for writing */
+        outline: none;
+        line-height: 1.7;
+        font-size: 16px;
+        color: hsl(var(--foreground));
+        max-width: none;
     }
 
     :global(.ProseMirror p) {
@@ -258,6 +345,8 @@
         color: hsl(var(--muted-foreground));
         pointer-events: none;
         height: 0;
+        font-size: 16px;
+        line-height: 1.7;
     }
 
     :global(.tiptap-image) { /* Target images added by Tiptap */

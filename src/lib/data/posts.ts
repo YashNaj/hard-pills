@@ -4,12 +4,19 @@
 export interface Post {
   id: string;
   title: string;
-  description: string;
+  content: string;
+  slug: string;
+  published: boolean;
   author: string;
-  date: string;
-  categories: string[];
-  imageUrl: string | null;
-  content?: string; // Content is now added below
+  createdAt: string;
+  updatedAt?: string;
+  status: string;
+  featured?: boolean;
+  // Legacy fields for compatibility with components
+  description?: string;
+  date?: string;
+  categories?: string[];
+  imageUrl?: string | null;
 }
 
 // Basic dummy content generator
@@ -34,13 +41,18 @@ function generateDummyContent(title: string): string {
 export const featuredPost: Post = {
   id: "featured-1",
   title: "The Hardest Pill: Accepting When You're Wrong",
-  description:
-    "Exploring the psychological challenges of admitting errors and how it leads to personal growth.",
+  content: generateDummyContent("Accepting When You're Wrong"),
+  slug: "accepting-when-youre-wrong",
+  published: true,
   author: "Alex Johnson",
+  createdAt: "2025-04-12T00:00:00Z",
+  status: "published",
+  featured: true,
+  // Legacy compatibility
+  description: "Exploring the psychological challenges of admitting errors and how it leads to personal growth.",
   date: "2025-04-12",
   categories: ["Psychology", "Growth"],
   imageUrl: "/hard_pills.png",
-  content: generateDummyContent("Accepting When You're Wrong"), // Added content
 };
 
 // --- Recent Posts ---

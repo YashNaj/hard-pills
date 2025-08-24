@@ -1,6 +1,6 @@
-import { db } from '../../../db/index.js';
-import { submissions } from '../../../../drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { db } from "../../../db/index.js";
+import { submissions } from "../../../../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 export interface CreateSubmissionData {
 	name?: string;
@@ -15,28 +15,33 @@ export interface UpdateSubmissionData {
 }
 
 export async function createSubmission(data: CreateSubmissionData) {
-	const [submission] = await db.insert(submissions).values({
-		...data,
-		status: 'pending'
-	}).returning();
-	
+	const [submission] = await db
+		.insert(submissions)
+		.values({
+			...data,
+			status: "pending",
+		})
+		.returning();
+
 	return submission;
 }
 
 export async function updateSubmission(id: string, data: UpdateSubmissionData) {
-	const [submission] = await db.update(submissions)
+	const [submission] = await db
+		.update(submissions)
 		.set(data)
 		.where(eq(submissions.id, id))
 		.returning();
-	
+
 	return submission;
 }
 
 export async function getSubmission(id: string) {
-	const [submission] = await db.select()
+	const [submission] = await db
+		.select()
 		.from(submissions)
 		.where(eq(submissions.id, id));
-	
+
 	return submission;
 }
 
@@ -49,8 +54,9 @@ export async function getAllSubmissions() {
 }
 
 export async function getPendingSubmissions() {
-	return db.select()
+	return db
+		.select()
 		.from(submissions)
-		.where(eq(submissions.status, 'pending'))
+		.where(eq(submissions.status, "pending"))
 		.orderBy(submissions.createdAt);
 }

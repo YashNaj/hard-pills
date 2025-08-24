@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { PostCard, PostList, FeaturedPost } from "$lib/components/post";
-  import { featuredPost, recentPosts } from "$lib/data/posts";
+  import { PostCard, PostList, FeaturedPost } from "./components";
   import { Button } from "$lib/components/ui/button";
   import {
     Tabs,
@@ -8,6 +7,9 @@
     TabsTrigger,
     TabsContent,
   } from "$lib/components/ui/tabs";
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
 <div
@@ -22,17 +24,19 @@
    flex flex-col items-center"
 >
   <!-- Featured Post -->
+  {#if data.featuredPost}
   <div class="h-fit">
     <FeaturedPost
-      id={featuredPost.id}
-      title={featuredPost.title}
-      description={featuredPost.description}
-      author={featuredPost.author}
-      date={featuredPost.date}
-      categories={featuredPost.categories}
-      imageUrl={featuredPost.imageUrl}
+      slug={data.featuredPost.slug}
+      title={data.featuredPost.title}
+      description={data.featuredPost.description}
+      author={data.featuredPost.author}
+      date={data.featuredPost.date}
+      categories={data.featuredPost.categories}
+      imageUrl={data.featuredPost.imageUrl}
     />
   </div>
+  {/if}
 
   <!-- Post Categories -->
   <div class="mb-16 mt-8 relative">
@@ -67,11 +71,11 @@
       </div>
 
       <TabsContent class="px-4" value="recent">
-        <PostList posts={recentPosts} />
+        <PostList posts={data.recentPosts} />
       </TabsContent>
 
       <TabsContent class="px-4" value="popular">
-        <PostList posts={[...recentPosts].sort(() => 0.5 - Math.random())} />
+        <PostList posts={[...data.recentPosts].sort(() => 0.5 - Math.random())} />
       </TabsContent>
     </Tabs>
   </div>

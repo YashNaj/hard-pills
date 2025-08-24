@@ -1,13 +1,19 @@
 <script lang='ts'>
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import TipTap from '$lib/components/admin/tip-tap.svelte';
+	import { fly, scale, fade } from 'svelte/transition';
+	import { quintOut, backOut } from 'svelte/easing';
+	import TipTap from '../../../components/tip-tap.svelte';
+	import BannerImageUpload from '../../../components/banner-image-upload.svelte';
+	import PostPreviewModal from '../../../components/post-preview-modal.svelte';
+	import SubmissionViewer from '../../../components/submission-viewer.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
-	import { Calendar, ExternalLink, Trash2 } from 'lucide-svelte';
+	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
+	import { Calendar, ExternalLink, Trash2, Eye, Settings, FileText, MessageSquare } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -21,12 +27,20 @@
 	let postId = $state<string>(data.post?.id);
 	let createdAt = $state(data.post?.createdAt);
 	let updatedAt = $state(data.post?.updatedAt);
+	let headerImageId = $state<string | null>(data.post?.headerImageId || null);
+	let headerImageUrl = $state<string | null>(data.post?.headerImageUrl || null);
+	let submissionId = $state<string | null>(data.post?.submissionId || data.submissionId || null);
+	
+	// Related submission data
+	const relatedSubmission = data.relatedSubmission;
 	
 	// UI state
 	let isSaving = $state(false);
 	let saveError = $state<string | null>(null);
 	let isPublishing = $state(false);
 	let isDeleting = $state(false);
+	let showPreview = $state(false);
+	let showEditorSidebar = $state(true); // Local editor sidebar state
 
 	// Mock user ID
 	const authorId = '22ae43cd-bfb8-426c-a3b0-5398be3dc93a';
@@ -62,6 +76,7 @@
 				status: newStatus || status,
 				featured,
 				scheduledAt: scheduledAt || null,
+				submissionId: submissionId,
 				updatedAt: new Date().toISOString()
 			};
 
@@ -140,12 +155,17 @@
 			window.open(`/post/${slug}`, '_blank');
 		}
 	}
+
+	function handleBannerImageChange(imageId: string | null, imageUrl: string | null) {
+		headerImageId = imageId;
+		headerImageUrl = imageUrl;
+	}
 </script>
 
-<div class="min-h-screen bg-background">
+<div class="min-h-full mt-6 overflow-auto px-6 bg-background ">
 	<!-- Modern Header with Glass Effect -->
-	<div class="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-		<div class="container flex h-16 items-center justify-between px-4">
+	<div class="z-[9] border-b sticky-top-0">
+		<div class="container flex h-16 w-full relative items-center justify-between ">
 			<div class="flex items-center gap-4">
 				<Button variant="ghost" size="sm" onclick={backToDashboard} class="text-muted-foreground hover:text-foreground">
 					← Back
@@ -160,6 +180,21 @@
 				<Badge variant={status === 'published' ? 'default' : status === 'scheduled' ? 'secondary' : 'outline'}>
 					{status.charAt(0).toUpperCase() + status.slice(1)}
 				</Badge>
+				
+				<Button variant="outline" size="sm" onclick={() => showPreview = true}>
+					<Eye class="w-4 h-4 mr-1" />
+					Preview
+				</Button>
+				
+				<Button 
+					variant="outline" 
+					size="sm" 
+					onclick={() => showEditorSidebar = !showEditorSidebar}
+					class="transition-all duration-200 hover:shadow-md {showEditorSidebar ? 'bg-primary text-primary-foreground' : ''}"
+				>
+					<Settings class="w-4 h-4 mr-1 transition-transform duration-200 {showEditorSidebar ? 'rotate-90' : ''}" />
+					{showEditorSidebar ? 'Hide' : 'Show'} Panel
+				</Button>
 				
 				{#if status === 'published'}
 					<Button variant="outline" size="sm" onclick={viewPost}>
@@ -201,55 +236,87 @@
 		</div>
 	</div>
 
-	<!-- Main Editor Layout -->
-	<div class="container max-w-6xl mx-auto p-4">
-		<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-			<!-- Main Content Area -->
-			<div class="lg:col-span-3 space-y-6">
-				<!-- Post Meta -->
-				<div class="space-y-4 p-6 border rounded-xl bg-card">
-					<div class="space-y-2">
-						<Label for="title" class="text-sm font-medium">Post Title</Label>
-						<Input
-							id="title"
-							bind:value={title}
-							placeholder="Enter your post title..."
-							class="text-lg h-12 font-semibold"
-						/>
-					</div>
-					
-					<div class="space-y-2">
-						<Label for="slug" class="text-sm font-medium">URL Slug</Label>
-						<Input
-							id="slug"
-							bind:value={slug}
-							placeholder="post-url-slug"
-							class="font-mono text-sm"
-						/>
-						{#if slug}
-							<p class="text-xs text-muted-foreground">Preview: /post/{slug}</p>
-						{/if}
-					</div>
+	<!-- Full-Width Editor Layout -->
+	<div class="h-full flex flex-col -m-6 -mt-0">
+		<!-- Compact Title Bar -->
+		<div class="bg-background/95 backdrop-blur-sm border-b border-border px-6 py-3 flex-shrink-0">
+			<div class="flex items-center gap-6">
+				<!-- Title Input - Takes most space -->
+				<div class="flex-1 min-w-0">
+					<Input
+						id="title"
+						bind:value={title}
+						placeholder="Enter your post title..."
+						class="text-lg font-semibold border-none shadow-none bg-transparent px-0 h-10 focus:ring-0 focus-visible:ring-0"
+					/>
 				</div>
-
-				<!-- Rich Text Editor -->
-				<div class="border rounded-xl overflow-hidden bg-card shadow-sm">
-					<TipTap
-						{postId}
-						{title}
-						{slug}
-						author={authorId}
-						initialContent={content}
-						onUpdate={(newContent) => content = newContent}
-						supabase={data.supabase}
-						placeholderText="Continue writing your amazing post..."
+				
+				<!-- Slug Input - Compact -->
+				<div class="flex items-center gap-2 text-sm">
+					<span class="text-muted-foreground font-mono">/post/</span>
+					<Input
+						id="slug"
+						bind:value={slug}
+						placeholder="url-slug"
+						class="font-mono text-sm h-8 w-32 border border-border/50 bg-muted/30 px-2 focus:w-48 transition-all duration-200"
 					/>
 				</div>
 			</div>
+		</div>
 
-			<!-- Sidebar -->
-			<div class="lg:col-span-1 space-y-6">
-				<!-- Publishing Options -->
+		<!-- Main Content Area with Editor and Embedded Sidebar -->
+		<div class="flex-1 flex overflow-hidden">
+			<!-- Rich Text Editor -->
+			<div class="flex-1 bg-background transition-all duration-500 ease-out">
+				<TipTap
+					{postId}
+					{title}
+					{slug}
+					author={authorId}
+					initialContent={content}
+					onUpdate={(newContent) => content = newContent}
+					supabase={data.supabase}
+					placeholderText="Start writing your amazing post..."
+				/>
+			</div>
+			
+			<!-- Embedded Editor Sidebar Panel -->
+			{#if showEditorSidebar}
+				<div 
+					class="w-80 bg-muted/20 border-l border-border overflow-auto flex-shrink-0 max-h-full overflow-auto"
+					in:fly={{ x: 320, duration: 400, easing: quintOut }}
+					out:fly={{ x: 320, duration: 300, easing: quintOut }}
+				>
+					<div class="p-4 space-y-4">
+						{#if relatedSubmission}
+							<!-- Tabs for Submission and Settings -->
+							<Tabs value="submission" class="w-full">
+								<TabsList class="grid w-full grid-cols-2">
+									<TabsTrigger value="submission" class="flex items-center gap-2 text-xs">
+										<MessageSquare class="w-3 h-3" />
+										Submission
+									</TabsTrigger>
+									<TabsTrigger value="settings" class="flex items-center gap-2 text-xs">
+										<Settings class="w-3 h-3" />
+										Settings
+									</TabsTrigger>
+								</TabsList>
+								
+								<TabsContent value="submission" class="space-y-4 mt-4">
+									<SubmissionViewer submission={relatedSubmission} />
+								</TabsContent>
+								
+								<TabsContent value="settings" class="space-y-4 mt-4">
+									<!-- Banner Image Upload -->
+									<BannerImageUpload 
+										{postId}
+										supabase={data.supabase}
+										bind:currentImageId={headerImageId}
+										bind:currentImageUrl={headerImageUrl}
+										onImageChange={handleBannerImageChange}
+									/>
+									
+									<!-- Publishing Options -->
 				<div class="p-4 border rounded-xl bg-card space-y-4">
 					<h3 class="font-semibold text-sm">Publishing</h3>
 					
@@ -319,15 +386,143 @@
 							Copy Post URL
 						</Button>
 					</div>
-				</div>
-			</div>
-		</div>
+										</div>
+										
+										<!-- Post Stats -->
+										<div class="p-4 border rounded-xl bg-card space-y-3">
+											<h3 class="font-semibold text-sm">Post Info</h3>
+											<div class="space-y-2 text-xs text-muted-foreground">
+												<div>Created: {createdAt ? new Date(createdAt).toLocaleDateString() : 'New post'}</div>
+												<div>Last saved: {updatedAt ? new Date(updatedAt).toLocaleString() : 'Never'}</div>
+												<div>Word count: ~{content.replace(/<[^>]*>/g, '').split(' ').filter(w => w.length > 0).length}</div>
+												<div>Status: {status}</div>
+												{#if featured}
+													<div class="text-amber-600">⭐ Featured</div>
+												{/if}
+											</div>
+										</div>
 
-		<!-- Error Display -->
-		{#if saveError}
-			<div class="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-				{saveError}
-			</div>
-		{/if}
+										<!-- Quick Actions -->
+										<div class="p-4 border rounded-xl bg-card space-y-3">
+											<h3 class="font-semibold text-sm">Quick Actions</h3>
+											<div class="space-y-2">
+												{#if status === 'published'}
+													<Button variant="outline" size="sm" class="w-full justify-start" onclick={viewPost}>
+														<ExternalLink class="w-4 h-4 mr-2" />
+														View Live Post
+													</Button>
+												{/if}
+												<Button variant="outline" size="sm" class="w-full justify-start" onclick={() => navigator.clipboard.writeText(`/post/${slug}`)}>
+													Copy Post URL
+												</Button>
+											</div>
+										</div>
+								</TabsContent>
+							</Tabs>
+						{:else}
+							<!-- No submission - show regular settings -->
+							<!-- Banner Image Upload -->
+							<BannerImageUpload 
+								{postId}
+								supabase={data.supabase}
+								bind:currentImageId={headerImageId}
+								bind:currentImageUrl={headerImageUrl}
+								onImageChange={handleBannerImageChange}
+							/>
+							
+							<!-- Publishing Options -->
+							<div class="p-4 border rounded-xl bg-card space-y-4">
+								<h3 class="font-semibold text-sm">Publishing</h3>
+								
+								<div class="space-y-3">
+									<div class="flex items-center gap-2">
+										<input 
+											type="checkbox" 
+											id="featured" 
+											bind:checked={featured}
+											class="rounded border-border"
+										/>
+										<Label for="featured" class="text-sm">Featured Post</Label>
+									</div>
+									
+									<div class="space-y-2">
+										<Label class="text-sm">Schedule Publishing</Label>
+										<div class="flex gap-2">
+											<Input
+												type="datetime-local"
+												bind:value={scheduledAt}
+												class="text-xs"
+											/>
+											<Button 
+												variant="outline" 
+												size="sm"
+												onclick={schedulePost}
+												disabled={!scheduledAt || isSaving}
+												class="shrink-0"
+											>
+												<Calendar class="w-4 h-4" />
+											</Button>
+										</div>
+										{#if scheduledAt}
+											<p class="text-xs text-muted-foreground">
+												Will publish: {new Date(scheduledAt).toLocaleString()}
+											</p>
+										{/if}
+									</div>
+								</div>
+							</div>
+
+							<!-- Post Stats -->
+							<div class="p-4 border rounded-xl bg-card space-y-3">
+								<h3 class="font-semibold text-sm">Post Info</h3>
+								<div class="space-y-2 text-xs text-muted-foreground">
+									<div>Created: {createdAt ? new Date(createdAt).toLocaleDateString() : 'New post'}</div>
+									<div>Last saved: {updatedAt ? new Date(updatedAt).toLocaleString() : 'Never'}</div>
+									<div>Word count: ~{content.replace(/<[^>]*>/g, '').split(' ').filter(w => w.length > 0).length}</div>
+									<div>Status: {status}</div>
+									{#if featured}
+										<div class="text-amber-600">⭐ Featured</div>
+									{/if}
+								</div>
+							</div>
+
+							<!-- Quick Actions -->
+							<div class="p-4 border rounded-xl bg-card space-y-3">
+								<h3 class="font-semibold text-sm">Quick Actions</h3>
+								<div class="space-y-2">
+									{#if status === 'published'}
+										<Button variant="outline" size="sm" class="w-full justify-start" onclick={viewPost}>
+											<ExternalLink class="w-4 h-4 mr-2" />
+											View Live Post
+										</Button>
+									{/if}
+									<Button variant="outline" size="sm" class="w-full justify-start" onclick={() => navigator.clipboard.writeText(`/post/${slug}`)}>
+										Copy Post URL
+									</Button>
+								</div>
+							</div>
+						{/if}
+						
+						<!-- Error Display -->
+						{#if saveError}
+							<div class="p-4 border rounded-xl bg-destructive/10 border-destructive/20 text-destructive text-sm">
+								{saveError}
+							</div>
+						{/if}
+					</div>
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>
+
+<!-- Preview Modal -->
+<PostPreviewModal
+	bind:open={showPreview}
+	{title}
+	{content}
+	{slug}
+	{headerImageUrl}
+	{status}
+	{createdAt}
+/>

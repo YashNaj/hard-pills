@@ -36,7 +36,7 @@
 	}
 </script>
 
-<div class="space-y-6">
+<div class="space-y-6 px-6 py-3">
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<div>

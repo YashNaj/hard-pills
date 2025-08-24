@@ -1,5 +1,5 @@
-<!-- src/lib/components/posts/post-card.svelte -->
-<script>
+<!-- Post card component for displaying blog post previews -->
+<script lang="ts">
   import {
     Card,
     CardContent,
@@ -13,7 +13,17 @@
   import { onMount } from "svelte";
   import { browser } from "$app/environment";
 
-  let { id, title, description, author, date, categories, imageUrl } = $props();
+  interface Props {
+    slug: string;
+    title: string;
+    description?: string;
+    author: string;
+    date: string;
+    categories?: string[];
+    imageUrl?: string | null;
+  }
+
+  let { slug, title, description = "", author, date, categories = [], imageUrl }: Props = $props();
 
   function formatDate(dateString) {
     try {
@@ -39,27 +49,29 @@
   // Names for elements that should morph
   const imageTransitionName = $derived(
     viewTransitionStyleBase
-      ? `${viewTransitionStyleBase} post-${id}-image`
+      ? `${viewTransitionStyleBase} post-${slug}-image`
       : "",
   );
   const titleTransitionName = $derived(
     viewTransitionStyleBase
-      ? `${viewTransitionStyleBase} post-${id}-title`
+      ? `${viewTransitionStyleBase} post-${slug}-title`
       : "",
   );
   const categoriesTransitionName = $derived(
     viewTransitionStyleBase
-      ? `${viewTransitionStyleBase} post-${id}-categories`
+      ? `${viewTransitionStyleBase} post-${slug}-categories`
       : "",
   ); // For the wrapper div
   const metaTransitionName = $derived(
-    viewTransitionStyleBase ? `${viewTransitionStyleBase} post-${id}-meta` : "",
+    viewTransitionStyleBase
+      ? `${viewTransitionStyleBase} post-${slug}-meta`
+      : "",
   ); // For the author/date div
   // --- End View Transition Setup ---
 </script>
 
 <Card
-  class="comic-panel border-4 border-black bg-pills-pink shadow-[4px_4px_0px_#000000] hover:shadow-[6px_6px_0px_#000000] transition-shadow duration-200 w-full mb-8 rounded-none overflow-hidden flex flex-col"
+  class="comic-panel font-bangers border-4 border-black bg-pills-pink shadow-[4px_4px_0px_#000000] hover:shadow-[6px_6px_0px_#000000] transition-shadow duration-200 w-full mb-8 rounded-none overflow-hidden flex flex-col"
 >
   {#if imageUrl}
     <div class="m-4 p-1 bg-black transform -rotate-2 origin-center">
@@ -114,7 +126,7 @@
   <CardFooter class="p-4 pt-2">
     <Button
       variant="link"
-      href={`/post/${id}`}
+      href={`/post/${slug}`}
       class="px-0 text-purple-700 hover:text-black uppercase font-bold text-sm tracking-wider"
     >
       Read more »

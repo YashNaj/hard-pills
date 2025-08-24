@@ -1,7 +1,7 @@
-<!-- src/routes/post/[id]/+page.svelte -->
+<!-- src/routes/post/[slug]/+page.svelte -->
 <script lang="ts">
   import type { PageData } from "./$types";
-  import ArticlePost from "./article-post.svelte"; // Import your display component
+  import { ArticlePost } from "../../components"; // Import from shared components
   import { browser } from "$app/environment";
   import { fade } from "svelte/transition"; // Optional basic transition for the whole page
 

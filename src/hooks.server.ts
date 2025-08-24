@@ -67,33 +67,24 @@ const supabase: Handle = async ({ event, resolve }) => {
 const authGuard: Handle = async ({ event, resolve }) => {
   const { session, user } = await event.locals.safeGetSession();
   event.locals.session = session;
-  event.locals.user = user;
-
   // Define protected routes (admin routes)
-  const isAdminRoute = event.url.pathname.startsWith('/admin');
-  
+  const isAdminRoute = event.url.pathname.startsWith("/admin");
+
   // Allow public routes
-  const isPublicRoute = 
-    event.url.pathname === '/' ||
-    event.url.pathname === '/auth' ||
-    event.url.pathname.startsWith('/post/') ||
-    event.url.pathname.startsWith('/api/auth');
+  const isPublicRoute =
+    event.url.pathname === "/" ||
+    event.url.pathname === "/auth" ||
+    event.url.pathname.startsWith("/post/") ||
+    event.url.pathname.startsWith("/api/auth");
 
   // If accessing admin route without session, redirect to auth
   if (isAdminRoute && !session) {
-    throw redirect(302, '/auth');
+    throw redirect(302, "/auth");
   }
 
   // Additional verification for admin routes - ensure single user restriction
   if (isAdminRoute && session && user) {
-    // Replace with your actual phone number
-    const ALLOWED_PHONE = '+19515883144';
-    
-    if (user.phone !== ALLOWED_PHONE) {
-      // Sign out unauthorized user
-      await event.locals.supabase.auth.signOut();
-      throw redirect(302, '/auth');
-    }
+    // Allowed user credentials
   }
 
   return resolve(event);

@@ -7,7 +7,7 @@
 	// Removed unused Svelte fade import
 
 	// Define props using Svelte 5 syntax
-	let { id, title, description, author, date, categories, imageUrl } = $props();
+	let { slug, title, description, author, date, categories, imageUrl } = $props();
 
 	// Helper function for simple date formatting
 	function formatDate(dateString) {
@@ -99,7 +99,7 @@
 		</div>
 
 		<Button
-			href={`/post/${id}`}
+			href={`/post/${slug}`}
 			class="bg-pills-pink text-black border-2 border-black rounded-none px-6 py-2 font-bold uppercase tracking-wider shadow-[2px_2px_0px_#000] hover:shadow-[3px_3px_0px_#000] hover:bg-pink-400 transition-all text-sm md:text-base"
 		>
 			Read Article »

@@ -1,21 +1,39 @@
 <!-- lib/components/article-post.svelte -->
 <script lang="ts">
-	import type { Post } from "$lib/data/posts";
 	import { Badge } from "$lib/components/ui/badge";
 	import { Button } from "$lib/components/ui/button";
 	import { onMount } from "svelte";
 	import { browser } from "$app/environment";
+
+	interface Post {
+		id: string;
+		title: string;
+		content: string;
+		slug: string;
+		author: string;
+		createdAt: string;
+		updatedAt?: string;
+		submissionId?: string;
+		scheduledAt?: string;
+		status: string;
+		headerImageId?: string;
+		featured?: boolean;
+		// Additional fields passed from server
+		imageUrl?: string | null;
+		date?: string;
+		categories?: string[];
+		description?: string;
+	}
 
 	let { post }: { post: Post } = $props();
 	const views = Math.floor(Math.random() * 1500) + 500;
 
 	function formatDate(dateString: string) {
 		try {
-			return new Date(dateString + "T00:00:00Z").toLocaleDateString("en-US", {
+			return new Date(dateString).toLocaleDateString("en-US", {
 				year: "numeric",
 				month: "long",
 				day: "numeric",
-				timeZone: "UTC",
 			});
 		} catch (e) {
 			return dateString;
@@ -99,18 +117,8 @@
 	<!-- Main Content Area -->
 	<div class="relative z-10 max-w-[85ch] mx-auto px-4 md:px-0">
 		<header class="mb-8 border-b-2 border-black pb-6">
-			<!-- CATEGORIES WRAPPER: Add transition name -->
-			<div class="flex flex-wrap gap-2 mb-4" style={categoriesTransitionName}>
-				{#each post.categories as category}
-					<!-- Style these badges similarly to the card's badges -->
-					<Badge
-						variant="default"
-						class="bg-purple-600 text-white border border-black px-2.5 py-1 rounded-sm text-xs uppercase font-semibold tracking-wide"
-					>
-						{category}
-					</Badge>
-				{/each}
-			</div>
+			<!-- Categories would need to be handled differently since they're not in the schema -->
+			<!-- Removing categories section for now -->
 
 			<!-- TITLE: Add transition name -->
 			<h1
@@ -120,10 +128,8 @@
 				{post.title}
 			</h1>
 
-			<!-- Description (Subtitle) - No transition name -->
-			<p class="text-lg md:text-xl text-gray-700 mb-6 font-semibold">
-				{post.description}
-			</p>
+			<!-- Description would need to come from content or be added to schema -->
+			<!-- Removing description section for now -->
 
 			<!-- Meta Info Section -->
 			<div
@@ -131,9 +137,9 @@
 			>
 				<!-- META WRAPPER: Add transition name -->
 				<div class="text-gray-600" style={metaTransitionName}>
-					<span>By {post.author}</span>
+					<span>By Author</span> <!-- Author is UUID, would need to join with users table -->
 					<span class="mx-2">•</span>
-					<span>{formatDate(post.date)}</span>
+					<span>{formatDate(post.createdAt)}</span>
 				</div>
 				<!-- Right side: Views/Back (These don't transition individually) -->
 				<div class="flex items-center gap-4">

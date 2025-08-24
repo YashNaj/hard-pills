@@ -86,7 +86,7 @@
 </script>
 
 <Sidebar class="border-r">
-	<SidebarHeader class="border-b h-16">
+	<SidebarHeader class="border-b h-16 bg-pills-pink">
 		<a
 			href="/"
 			class="flex items-center gap-3 hover:opacity-80 h-full justify-center w-full transition-opacity"

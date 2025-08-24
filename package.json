@@ -46,6 +46,7 @@
     "zod": "^3.24.2"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/table-core": "^8.21.3",
