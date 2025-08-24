@@ -77,7 +77,7 @@ const authGuard: Handle = async ({ event, resolve }) => {
     event.url.pathname.startsWith("/api/auth");
 
   // If accessing admin route without session, redirect to auth
-  if ((isAdminRoute && !session) || isPublicRoute) {
+  if (isAdminRoute && !session) {
     throw redirect(302, "/auth");
   }
 

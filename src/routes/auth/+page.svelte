@@ -17,7 +17,7 @@
 	<title>Admin Login - Hard Pills</title>
 </svelte:head>
 
-<div class="min-h-flex items-center justify-center bg-background p-4">
+<div class="min-h-screen min-w-screen flex font-inter items-center justify-center bg-background p-4">
 	<Card class="w-full max-w-md">
 		<CardHeader class="text-center sticky">
 			<div class="flex justify-center mb-4">
