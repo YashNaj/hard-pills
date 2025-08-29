@@ -50,7 +50,18 @@ export async function deleteSubmission(id: string) {
 }
 
 export async function getAllSubmissions() {
-	return db.select().from(submissions).orderBy(submissions.createdAt);
+	try {
+		console.log("🔍 [SUBMISSIONS] Starting getAllSubmissions query...");
+		const result = await db.select().from(submissions).orderBy(submissions.createdAt);
+		console.log("✅ [SUBMISSIONS] Query successful, found", result.length, "submissions");
+		return result;
+	} catch (error) {
+		console.error("🚫 [SUBMISSIONS] Error in getAllSubmissions:");
+		console.error("🚫 [SUBMISSIONS] Error code:", error.code);
+		console.error("🚫 [SUBMISSIONS] Error message:", error.message);
+		console.error("🚫 [SUBMISSIONS] Full error:", error);
+		throw error;
+	}
 }
 
 export async function getPendingSubmissions() {
