@@ -10,7 +10,9 @@ console.log(
   DATABASE_URL?.slice(0, 20) + "...",
 );
 
-const client = postgres(DATABASE_URL, { prepare: false }); // if using Supabase connection pooling
-export const db = drizzle({ client, schema });
+// Use transaction mode connection (port 6543) for Vercel serverless deployment
+// Disable prepared statements as required by Supabase connection pooler
+const client = postgres(DATABASE_URL, { prepare: false });
+export const db = drizzle(client, { schema });
 
 console.log("🔗 [DB] Database client initialized successfully");

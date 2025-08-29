@@ -2,7 +2,7 @@
 
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { db } from '../../../../db/index.js';
+import { db } from '$lib/server/db';
 import { posts, postImages } from '../../../../../drizzle/schema';
 import { eq, and } from 'drizzle-orm';
 

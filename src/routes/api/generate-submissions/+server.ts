@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { faker } from '@faker-js/faker';
-import { db } from '../../../db/index.js';
+import { db } from '$lib/server/db';
 import { submissions } from '../../../../drizzle/schema.js';
 import type { RequestHandler } from './$types';
 

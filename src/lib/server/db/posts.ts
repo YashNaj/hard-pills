@@ -1,4 +1,4 @@
-import { db } from "../../../db/index.js";
+import { db } from "./index";
 import { posts } from "../../../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 import type { User } from "@supabase/supabase-js";
