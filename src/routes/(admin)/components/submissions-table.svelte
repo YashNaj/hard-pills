@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
 	import { 
 		Table,
 		TableBody,
@@ -10,29 +10,56 @@
 		TableHeader,
 		TableRow
 	} from '$lib/components/ui/table';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Inbox, Eye, Check, X, ArrowRight, User } from 'lucide-svelte';
-	
-	let submissions = $state([]);
-	let loading = $state(true);
-	
-	onMount(async () => {
-		await loadSubmissions();
-	});
-	
-	async function loadSubmissions() {
-		try {
-			const response = await fetch('/api/submissions');
-			if (response.ok) {
-				const data = await response.json();
-				submissions = data.submissions || [];
-			}
-		} catch (error) {
-			console.error('Failed to load submissions:', error);
-		} finally {
-			loading = false;
-		}
+	import { Inbox, Eye, Check, X, ArrowRight, User, Mail, Calendar, FileText, MoreHorizontal, Filter, Search } from 'lucide-svelte';
+
+	interface Props {
+		submissions?: any[];
 	}
+
+	let { submissions = [] }: Props = $props();
+	
+	let selectedSubmission = $state(null);
+	let showDetailDialog = $state(false);
+	let searchTerm = $state('');
+	let statusFilter = $state('all');
+	
+	// Track if filters have been touched
+	let searchTouched = $state(false);
+	let statusTouched = $state(false);
+	
+	
+	// Filtered submissions based on search term and status - only when filters are touched
+	let filteredSubmissions: any[] = $derived(() => {
+		// Ensure submissions is an array and has data
+		if (!Array.isArray(submissions) || submissions.length === 0) {
+			return [];
+		}
+		
+		let filtered = submissions;
+		
+		// Only apply search filter if search has been touched AND has content
+		if (searchTouched && searchTerm && searchTerm.trim() !== '') {
+			const search = searchTerm.toLowerCase();
+			filtered = filtered.filter(submission => 
+				(submission.name || '').toLowerCase().includes(search) ||
+				(submission.email || '').toLowerCase().includes(search) ||
+				(submission.subject || '').toLowerCase().includes(search) ||
+				(submission.content || '').toLowerCase().includes(search)
+			);
+		}
+		
+		// Only apply status filter if status has been touched AND is not 'all'
+		if (statusTouched && statusFilter && statusFilter !== 'all') {
+			filtered = filtered.filter(submission => 
+				(submission.status || 'pending') === statusFilter
+			);
+		}
+		
+		return filtered;
+	});
 	
 	function getStatusVariant(status: string) {
 		switch (status) {
@@ -48,6 +75,21 @@
 				return 'outline';
 		}
 	}
+
+	function getStatusColor(status: string) {
+		switch (status) {
+			case 'pending':
+				return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+			case 'approved':
+				return 'text-green-600 bg-green-50 border-green-200';
+			case 'rejected':
+				return 'text-red-600 bg-red-50 border-red-200';
+			case 'converted':
+				return 'text-blue-600 bg-blue-50 border-blue-200';
+			default:
+				return 'text-gray-600 bg-gray-50 border-gray-200';
+		}
+	}
 	
 	function formatDate(dateString: string) {
 		return new Date(dateString).toLocaleDateString('en-US', {
@@ -58,8 +100,21 @@
 			minute: '2-digit'
 		});
 	}
+
+	function formatRelativeDate(dateString: string) {
+		const date = new Date(dateString);
+		const now = new Date();
+		const diff = now.getTime() - date.getTime();
+		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+		
+		if (days === 0) return 'Today';
+		if (days === 1) return 'Yesterday';
+		if (days < 7) return `${days} days ago`;
+		if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+		return formatDate(dateString);
+	}
 	
-	function truncateContent(content: string, maxLength = 50) {
+	function truncateContent(content: string, maxLength = 60) {
 		return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
 	}
 	
@@ -74,7 +129,8 @@
 			});
 			
 			if (response.ok) {
-				await loadSubmissions(); // Refresh the list
+				// Trigger a refresh by dispatching an event
+				window.dispatchEvent(new CustomEvent('submissionUpdated'));
 			} else {
 				alert('Failed to update submission');
 			}
@@ -95,15 +151,13 @@
 					submissionId: submission.id,
 					title: submission.subject || 'Untitled Post',
 					content: submission.content,
-					author: '22ae43cd-bfb8-426c-a3b0-5398be3dc93a' // Mock author for testing
+					author: '22ae43cd-bfb8-426c-a3b0-5398be3dc93a'
 				})
 			});
 			
 			if (response.ok) {
 				const { post } = await response.json();
 				await updateSubmissionStatus(submission.id, 'converted');
-				
-				// Navigate to edit the new post
 				window.location.href = `/admin?edit=${post.id}`;
 			} else {
 				alert('Failed to convert submission');
@@ -115,114 +169,232 @@
 	}
 	
 	function viewSubmission(submission: any) {
-		// Simple modal or alert for now - can be enhanced later
-		alert(`From: ${submission.name || 'Anonymous'}\nEmail: ${submission.email || 'No email'}\nSubject: ${submission.subject || 'No subject'}\n\nContent:\n${submission.content}`);
+		selectedSubmission = submission;
+		showDetailDialog = true;
 	}
+	
+	console.log('SUBMISSIONS', {submissions,filteredSubmissions})
 </script>
 
-<Card class="h-full">
-	<CardHeader>
-		<CardTitle class="flex items-center gap-2">
-			<Inbox class="h-5 w-5" />
-			Recent Submissions
-		</CardTitle>
-	</CardHeader>
-	<CardContent class="p-0">
-		{#if loading}
-			<div class="p-6 text-center text-muted-foreground">
-				Loading submissions...
+<!-- Modern Responsive Submissions Table -->
+<div class="flex flex-col h-full">
+	<!-- Filter Controls -->
+	<div class="flex-none p-4 border-b bg-background">
+		<div class="flex gap-4 items-center">
+			<!-- Search Input -->
+			<div class="flex-1 max-w-sm">
+				<div class="relative">
+					<Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+					<Input
+						bind:value={searchTerm}
+						placeholder="Search submissions..."
+						class="pl-10"
+						oninput={() => searchTouched = true}
+					/>
+				</div>
 			</div>
-		{:else if submissions.length === 0}
-			<div class="p-6 text-center text-muted-foreground">
-				No submissions yet. Waiting for user contributions!
+			
+			<!-- Status Filter -->
+			<div class="flex items-center gap-2">
+				<Filter class="h-4 w-4 text-muted-foreground" />
+				<select
+					bind:value={statusFilter}
+					class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+					onchange={() => statusTouched = true}
+				>
+					<option value="all">All Status</option>
+					<option value="pending">Pending</option>
+					<option value="approved">Approved</option>
+					<option value="rejected">Rejected</option>
+					<option value="converted">Converted</option>
+				</select>
 			</div>
-		{:else}
-			<div class="max-h-[600px] overflow-auto">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>From</TableHead>
-							<TableHead>Subject</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead>Date</TableHead>
-							<TableHead class="text-right">Actions</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{#each submissions as submission (submission.id)}
-							<TableRow>
-								<TableCell class="font-medium">
-									<div class="flex items-center gap-2">
-										<User class="h-4 w-4 text-muted-foreground" />
-										<div>
-											<div class="font-medium">{submission.name || 'Anonymous'}</div>
-											<div class="text-xs text-muted-foreground">{submission.email || 'No email'}</div>
-										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<div class="max-w-[200px]">
-										<div class="font-medium">{submission.subject || 'No subject'}</div>
-										<div class="text-xs text-muted-foreground">
-											{truncateContent(submission.content)}
-										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<Badge variant={getStatusVariant(submission.status)}>
-										{submission.status || 'pending'}
-									</Badge>
-								</TableCell>
-								<TableCell class="text-muted-foreground text-sm">
-									{formatDate(submission.createdAt)}
-								</TableCell>
-								<TableCell class="text-right">
-									<div class="flex items-center justify-end gap-1">
-										<Button
-											variant="ghost"
-											size="sm"
-											onclick={() => viewSubmission(submission)}
-											class="h-8 w-8 p-0"
-										>
+			
+			<!-- Results Count -->
+			<div class="text-sm text-muted-foreground">
+				{#if searchTouched || statusTouched}
+					{filteredSubmissions.length} of {submissions.length} submissions
+				{:else}
+					{submissions.length} submissions
+				{/if}
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Scrollable Content -->
+	<div class="flex-1 overflow-auto min-h-0">
+		<div class="divide-y divide-border">
+			{#each submissions as submission (submission.id)}
+					<div class="p-4 hover:bg-muted/5 transition-colors">
+						<div class="flex items-center justify-between gap-4">
+							<!-- Content -->
+							<div class="flex-1 min-w-0">
+								<h3 class="font-medium text-foreground truncate">
+									{submission.subject || 'No subject'}
+								</h3>
+								<p class="text-sm text-muted-foreground">
+									{submission.name || 'Anonymous'}
+									{#if submission.email}
+										• {submission.email}
+									{/if}
+								</p>
+							</div>
+							
+							<!-- Status and Actions -->
+							<div class="flex items-center gap-3 flex-shrink-0">
+								<div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border {getStatusColor(submission.status)}">
+									{submission.status || 'pending'}
+								</div>
+								<div class="text-xs text-muted-foreground">
+									{formatRelativeDate(submission.createdAt)}
+								</div>
+								<!-- Action Menu -->
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger>
+										{#snippet child({ props })}
+											<Button {...props} variant="ghost" size="sm" class="h-8 w-8 p-0">
+												<MoreHorizontal class="h-4 w-4" />
+												<span class="sr-only">Open menu</span>
+											</Button>
+										{/snippet}
+									</DropdownMenu.Trigger>
+									<DropdownMenu.Content align="end" class="w-48 bg-pink-50">
+										<DropdownMenu.Item onclick={() => viewSubmission(submission)} class="flex items-center gap-2">
 											<Eye class="h-4 w-4" />
-										</Button>
+											View Details
+										</DropdownMenu.Item>
 										
 										{#if submission.status === 'pending'}
-											<Button
-												variant="ghost"
-												size="sm"
-												onclick={() => updateSubmissionStatus(submission.id, 'approved')}
-												class="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+											<DropdownMenu.Separator />
+											<DropdownMenu.Item 
+												onclick={() => updateSubmissionStatus(submission.id, 'approved')} 
+												class="flex items-center gap-2 text-green-600"
 											>
 												<Check class="h-4 w-4" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="sm"
-												onclick={() => updateSubmissionStatus(submission.id, 'rejected')}
-												class="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+												Approve
+											</DropdownMenu.Item>
+											<DropdownMenu.Item 
+												onclick={() => updateSubmissionStatus(submission.id, 'rejected')} 
+												class="flex items-center gap-2 text-red-600"
 											>
 												<X class="h-4 w-4" />
-											</Button>
+												Reject
+											</DropdownMenu.Item>
 										{/if}
 										
 										{#if submission.status === 'approved' || submission.status === 'pending'}
-											<Button
-												variant="ghost"
-												size="sm"
-												onclick={() => convertToPost(submission)}
-												class="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
+											<DropdownMenu.Separator />
+											<DropdownMenu.Item 
+												onclick={() => convertToPost(submission)} 
+												class="flex items-center gap-2 text-blue-600"
 											>
 												<ArrowRight class="h-4 w-4" />
-											</Button>
+												Convert to Post
+											</DropdownMenu.Item>
 										{/if}
-									</div>
-								</TableCell>
-							</TableRow>
-						{/each}
-					</TableBody>
-				</Table>
+									</DropdownMenu.Content>
+								</DropdownMenu.Root>
+							</div>
+						</div>
+					</div>
+			{/each}
+		</div>
+	</div>
+</div>
+
+<!-- Detail Dialog -->
+<Dialog.Root bind:open={showDetailDialog}>
+	<Dialog.Content class="max-w-2xl bg-pink-50 max-h-[80vh]">
+		<Dialog.Header>
+			<Dialog.Title class="flex items-center gap-2">
+				<FileText class="h-5 w-5" />
+				Submission Details
+			</Dialog.Title>
+		</Dialog.Header>
+		
+		{#if selectedSubmission}
+			<div class="max-h-[60vh] overflow-auto pr-4">
+				<div class="space-y-6">
+					<!-- Submitter Info -->
+					<div class="space-y-3">
+						<h3 class="font-semibold text-foreground border-b pb-2">Submitter Information</h3>
+						<div class="grid grid-cols-2 gap-4">
+							<div>
+								<label class="text-sm font-medium text-muted-foreground">Name</label>
+								<div class="mt-1 text-sm font-medium">{selectedSubmission.name || 'Anonymous'}</div>
+							</div>
+							<div>
+								<label class="text-sm font-medium text-muted-foreground">Email</label>
+								<div class="mt-1 text-sm">{selectedSubmission.email || 'Not provided'}</div>
+							</div>
+						</div>
+						<div>
+							<label class="text-sm font-medium text-muted-foreground">Submitted</label>
+							<div class="mt-1 text-sm">{formatDate(selectedSubmission.createdAt)}</div>
+						</div>
+					</div>
+
+					<!-- Content -->
+					<div class="space-y-3">
+						<h3 class="font-semibold text-foreground border-b pb-2">Content</h3>
+						<div>
+							<label class="text-sm font-medium text-muted-foreground">Subject</label>
+							<div class="mt-1 text-sm font-medium">{selectedSubmission.subject || 'No subject'}</div>
+						</div>
+						<div>
+							<label class="text-sm font-medium text-muted-foreground">Message</label>
+							<div class="mt-1 text-sm bg-muted p-4 rounded-lg whitespace-pre-wrap">
+								{selectedSubmission.content}
+							</div>
+						</div>
+					</div>
+
+					<!-- Status & Actions -->
+					<div class="flex items-center justify-between pt-4 border-t">
+						<div class="flex items-center gap-3">
+							<span class="text-sm font-medium text-muted-foreground">Status:</span>
+							<div class="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium border {getStatusColor(selectedSubmission.status)}">
+								{selectedSubmission.status || 'pending'}
+							</div>
+						</div>
+						
+						<div class="flex items-center gap-2">
+							{#if selectedSubmission.status === 'pending'}
+								<Button 
+									size="sm" 
+									variant="outline"
+									onclick={() => updateSubmissionStatus(selectedSubmission.id, 'approved')}
+									class="text-green-600 border-green-200 hover:bg-green-50"
+								>
+									<Check class="h-4 w-4 mr-1" />
+									Approve
+								</Button>
+								<Button 
+									size="sm" 
+									variant="outline"
+									onclick={() => updateSubmissionStatus(selectedSubmission.id, 'rejected')}
+									class="text-red-600 border-red-200 hover:bg-red-50"
+								>
+									<X class="h-4 w-4 mr-1" />
+									Reject
+								</Button>
+							{/if}
+							
+							{#if selectedSubmission.status === 'approved' || selectedSubmission.status === 'pending'}
+								<Button 
+									size="sm"
+									onclick={() => convertToPost(selectedSubmission)}
+									class="bg-blue-600 hover:bg-blue-700"
+								>
+									<ArrowRight class="h-4 w-4 mr-1" />
+									Convert to Post
+								</Button>
+							{/if}
+						</div>
+					</div>
+				</div>
 			</div>
 		{/if}
-	</CardContent>
-</Card>
+	</Dialog.Content>
+</Dialog.Root>

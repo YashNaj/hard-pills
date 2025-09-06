@@ -32,16 +32,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 console.log("🔗 [DB] Production mode:", isProduction);
 
 const client = postgres(DATABASE_URL, { 
-  prepare: false,
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
-  max: 1, // Limit connections for serverless
-  idle_timeout: 20, // Close idle connections quickly
-  connect_timeout: 10, // Timeout connection attempts
-  onnotice: (notice) => console.log("🔗 [DB] Notice:", notice),
-  debug: false, // Disable debug in production to reduce noise
-  onconnect: (connection) => {
-    console.log("🔗 [DB] Successfully connected to database");
-  }
+  prepare: false
 });
 
 // Note: postgres-js client doesn't support .on() event listeners

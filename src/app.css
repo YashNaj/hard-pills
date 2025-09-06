@@ -3,7 +3,7 @@
 @layer theme, base, components, utilities;
 @theme {
   --font-sans:
-    "Bangers", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Helvetica", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
     "Noto Color Emoji";
   --font-bangers: "Bangers";
   --font-inter: "Inter";

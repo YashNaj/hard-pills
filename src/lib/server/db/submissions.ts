@@ -1,6 +1,6 @@
 import { db } from "./index";
 import { submissions } from "../../../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface CreateSubmissionData {
 	name?: string;
@@ -52,8 +52,17 @@ export async function deleteSubmission(id: string) {
 export async function getAllSubmissions() {
 	try {
 		console.log("🔍 [SUBMISSIONS] Starting getAllSubmissions query...");
-		const result = await db.select().from(submissions).orderBy(submissions.createdAt);
+		const result = await db.select().from(submissions).orderBy(desc(submissions.createdAt));
 		console.log("✅ [SUBMISSIONS] Query successful, found", result.length, "submissions");
+		if (result.length > 0) {
+			console.log("🔍 [SUBMISSIONS] Sample submission:", {
+				id: result[0].id?.slice(0, 8) + '...',
+				name: result[0].name,
+				subject: result[0].subject,
+				status: result[0].status,
+				createdAt: result[0].createdAt
+			});
+		}
 		return result;
 	} catch (error) {
 		console.error("🚫 [SUBMISSIONS] Error in getAllSubmissions:");

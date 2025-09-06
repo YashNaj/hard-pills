@@ -24,7 +24,7 @@
 	let status = $state(data.post?.status || 'draft');
 	let featured = $state(data.post?.featured || false);
 	let scheduledAt = $state<string>(data.post?.scheduledAt || '');
-	let postId = $state<string>(data.post?.id);
+	let postId = $state<string>(data.post?.id?.trim());
 	let createdAt = $state(data.post?.createdAt);
 	let updatedAt = $state(data.post?.updatedAt);
 	let headerImageId = $state<string | null>(data.post?.headerImageId || null);
@@ -68,7 +68,7 @@
 		
 		try {
 			const postData = {
-				id: postId,
+				id: postId?.trim(),
 				title: title.trim(),
 				slug: slug.trim() || title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
 				content,
@@ -129,7 +129,7 @@
 
 		isDeleting = true;
 		try {
-			const response = await fetch(`/api/posts/${postId}`, {
+			const response = await fetch(`/api/posts/${postId?.trim()}`, {
 				method: 'DELETE'
 			});
 

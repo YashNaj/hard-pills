@@ -102,14 +102,14 @@
 	}
 </script>
 
-<Card class="h-full">
-	<CardHeader>
+<Card class="h-full flex flex-col">
+	<CardHeader class="flex-none">
 		<CardTitle class="flex items-center gap-2">
 			<PenTool class="h-5 w-5" />
 			Create New Post
 		</CardTitle>
 	</CardHeader>
-	<CardContent class="space-y-6">
+	<CardContent class="flex-1 overflow-auto space-y-6 min-h-0">
 		<!-- Title & Slug -->
 		<div class="space-y-4">
 			<div class="space-y-2">

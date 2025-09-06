@@ -10,10 +10,10 @@ import {
 	uniqueIndex,
 	index,
 	jsonb,
-	unique,
 	integer,
-	varchar,
 	bigint,
+	unique,
+	varchar,
 	type AnyPgColumn,
 	serial,
 	check,
@@ -21,6 +21,7 @@ import {
 	json,
 	bigserial,
 	inet,
+	primaryKey,
 	pgEnum,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -41,6 +42,10 @@ export const factorTypeInAuth = auth.enum("factor_type", [
 	"webauthn",
 	"phone",
 ]);
+export const oauthRegistrationTypeInAuth = auth.enum(
+	"oauth_registration_type",
+	["dynamic", "manual"],
+);
 export const oneTimeTokenTypeInAuth = auth.enum("one_time_token_type", [
 	"confirmation_token",
 	"reauthentication_token",
@@ -49,12 +54,15 @@ export const oneTimeTokenTypeInAuth = auth.enum("one_time_token_type", [
 	"email_change_token_current",
 	"phone_change_token",
 ]);
-
 export const postStatus = pgEnum("post_status", [
 	"draft",
-	"scheduled", 
+	"scheduled",
 	"published",
 	"archived",
+]);
+export const buckettypeInStorage = storage.enum("buckettype", [
+	"STANDARD",
+	"ANALYTICS",
 ]);
 
 export const notifications = pgTable(
@@ -115,6 +123,7 @@ export const objectsInStorage = storage.table(
 		version: text(),
 		ownerId: text("owner_id"),
 		userMetadata: jsonb("user_metadata"),
+		level: integer(),
 	},
 	(table) => [
 		uniqueIndex("bucketid_objname").using(
@@ -122,135 +131,116 @@ export const objectsInStorage = storage.table(
 			table.bucketId.asc().nullsLast().op("text_ops"),
 			table.name.asc().nullsLast().op("text_ops"),
 		),
+		uniqueIndex("idx_name_bucket_level_unique").using(
+			"btree",
+			table.name.asc().nullsLast().op("text_ops"),
+			table.bucketId.asc().nullsLast().op("int4_ops"),
+			table.level.asc().nullsLast().op("text_ops"),
+		),
 		index("idx_objects_bucket_id_name").using(
 			"btree",
 			table.bucketId.asc().nullsLast().op("text_ops"),
 			table.name.asc().nullsLast().op("text_ops"),
 		),
+		index("idx_objects_lower_name").using(
+			"btree",
+			sql`path_tokens[level]`,
+			sql`lower(name)`,
+			sql`bucket_id`,
+			sql`level`,
+		),
 		index("name_prefix_search").using(
 			"btree",
 			table.name.asc().nullsLast().op("text_pattern_ops"),
+		),
+		uniqueIndex("objects_bucket_id_level_idx").using(
+			"btree",
+			table.bucketId.asc().nullsLast().op("text_ops"),
+			table.level.asc().nullsLast().op("text_ops"),
+			table.name.asc().nullsLast().op("text_ops"),
 		),
 		foreignKey({
 			columns: [table.bucketId],
 			foreignColumns: [bucketsInStorage.id],
 			name: "objects_bucketId_fkey",
 		}),
-		pgPolicy("Restrict post_images_original uploads to specific users", {
-			as: "permissive",
-			for: "insert",
-			to: ["authenticated"],
-			withCheck: sql`((bucket_id = 'post_images_original'::text) AND (auth.uid() = ANY (ARRAY['22ae43cd-bfb8-426c-a3b0-5398be3dc93a'::uuid, '3e90b0ab-48ce-48c6-8238-3676b0584b82'::uuid])))`,
-		}),
-		pgPolicy("Allow specific users to update post_images_original", {
-			as: "permissive",
-			for: "update",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow specific users to delete post_images_original", {
-			as: "permissive",
-			for: "delete",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow public to view post_images_original", {
+		pgPolicy("Give anon users access to JPG images in folder jixmzo_0", {
 			as: "permissive",
 			for: "select",
-			to: ["anon", "authenticated"],
+			to: ["public"],
+			using: sql`((bucket_id = 'Post Images Thumbnail'::text) AND (storage.extension(name) = 'jpg'::text) AND (lower((storage.foldername(name))[1]) = 'public'::text) AND (auth.role() = 'anon'::text))`,
 		}),
-		pgPolicy("Restrict post_images_large uploads to specific users", {
-			as: "permissive",
-			for: "insert",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow specific users to update post_images_large", {
-			as: "permissive",
-			for: "update",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow specific users to delete post_images_large", {
-			as: "permissive",
-			for: "delete",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow public to view post_images_large", {
+		pgPolicy("Give anon users access to JPG images in folder 30v6b3_0", {
 			as: "permissive",
 			for: "select",
-			to: ["anon", "authenticated"],
+			to: ["public"],
 		}),
-		pgPolicy("Restrict post_images_medium uploads to specific users", {
-			as: "permissive",
-			for: "insert",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow specific users to update post_images_medium", {
-			as: "permissive",
-			for: "update",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow specific users to delete post_images_medium", {
-			as: "permissive",
-			for: "delete",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow public to view post_images_medium", {
+		pgPolicy("Give anon users access to JPG images in folder 1xz1igt_0", {
 			as: "permissive",
 			for: "select",
-			to: ["anon", "authenticated"],
+			to: ["public"],
 		}),
-		pgPolicy("Restrict post_images_thumbnail uploads to specific users", {
-			as: "permissive",
-			for: "insert",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow specific users to update post_images_thumbnail", {
-			as: "permissive",
-			for: "update",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow specific users to delete post_images_thumbnail", {
-			as: "permissive",
-			for: "delete",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow public to view post_images_thumbnail", {
+		pgPolicy("Give anon users access to JPG images in folder mv188j_0", {
 			as: "permissive",
 			for: "select",
-			to: ["anon", "authenticated"],
+			to: ["public"],
 		}),
-		pgPolicy("Restrict post_images_blur uploads to specific users", {
-			as: "permissive",
-			for: "insert",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow specific users to update post_images_blur", {
-			as: "permissive",
-			for: "update",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow specific users to delete post_images_blur", {
-			as: "permissive",
-			for: "delete",
-			to: ["authenticated"],
-		}),
-		pgPolicy("Allow public to view post_images_blur", {
+		pgPolicy("Give anon users access to JPG images in folder fupf6h_0", {
 			as: "permissive",
 			for: "select",
-			to: ["anon", "authenticated"],
+			to: ["public"],
+		}),
+		pgPolicy("Authenticated users full access to post_images_original", {
+			as: "permissive",
+			for: "all",
+			to: ["authenticated"],
+		}),
+		pgPolicy("Public read access to post_images_original", {
+			as: "permissive",
+			for: "select",
+			to: ["public"],
+		}),
+		pgPolicy("Authenticated users full access to post_images_large", {
+			as: "permissive",
+			for: "all",
+			to: ["authenticated"],
+		}),
+		pgPolicy("Public read access to post_images_large", {
+			as: "permissive",
+			for: "select",
+			to: ["public"],
+		}),
+		pgPolicy("Authenticated users full access to post_images_medium", {
+			as: "permissive",
+			for: "all",
+			to: ["authenticated"],
+		}),
+		pgPolicy("Public read access to post_images_medium", {
+			as: "permissive",
+			for: "select",
+			to: ["public"],
+		}),
+		pgPolicy("Authenticated users full access to post_images_thumbnail", {
+			as: "permissive",
+			for: "all",
+			to: ["authenticated"],
+		}),
+		pgPolicy("Public read access to post_images_thumbnail", {
+			as: "permissive",
+			for: "select",
+			to: ["public"],
+		}),
+		pgPolicy("Authenticated users full access to post_images_blur", {
+			as: "permissive",
+			for: "all",
+			to: ["authenticated"],
+		}),
+		pgPolicy("Public read access to post_images_blur", {
+			as: "permissive",
+			for: "select",
+			to: ["public"],
 		}),
 	],
-);
-
-export const migrationsInStorage = storage.table(
-	"migrations",
-	{
-		id: integer().primaryKey().notNull(),
-		name: varchar({ length: 100 }).notNull(),
-		hash: varchar({ length: 40 }).notNull(),
-		executedAt: timestamp("executed_at", { mode: "string" }).default(
-			sql`CURRENT_TIMESTAMP`,
-		),
-	},
-	(table) => [unique("migrations_name_key").on(table.name)],
 );
 
 export const bucketsInStorage = storage.table(
@@ -273,6 +263,7 @@ export const bucketsInStorage = storage.table(
 		fileSizeLimit: bigint("file_size_limit", { mode: "number" }),
 		allowedMimeTypes: text("allowed_mime_types").array(),
 		ownerId: text("owner_id"),
+		type: buckettypeInStorage().default("STANDARD").notNull(),
 	},
 	(table) => [
 		uniqueIndex("bname").using(
@@ -282,20 +273,17 @@ export const bucketsInStorage = storage.table(
 	],
 );
 
-export const profiles = pgTable(
-	"profiles",
+export const migrationsInStorage = storage.table(
+	"migrations",
 	{
-		id: uuid().primaryKey().notNull(),
-		firstName: text("first_name"),
-		lastName: text("last_name"),
+		id: integer().primaryKey().notNull(),
+		name: varchar({ length: 100 }).notNull(),
+		hash: varchar({ length: 40 }).notNull(),
+		executedAt: timestamp("executed_at", { mode: "string" }).default(
+			sql`CURRENT_TIMESTAMP`,
+		),
 	},
-	(table) => [
-		foreignKey({
-			columns: [table.id],
-			foreignColumns: [usersInAuth.id],
-			name: "profiles_id_fkey",
-		}).onDelete("cascade"),
-	],
+	(table) => [unique("migrations_name_key").on(table.name)],
 );
 
 export const postImages = pgTable(
@@ -354,17 +342,60 @@ export const postImages = pgTable(
 			foreignColumns: [posts.id],
 			name: "post_images_post_id_fkey",
 		}).onDelete("cascade"),
-		pgPolicy("Allow specific users to manage post_images", {
-			as: "permissive",
-			for: "all",
-			to: ["authenticated"],
-			using: sql`(auth.uid() = ANY (ARRAY['22ae43cd-bfb8-426c-a3b0-5398be3dc93a'::uuid, '3e90b0ab-48ce-48c6-8238-3676b0584b82'::uuid]))`,
-		}),
 		pgPolicy("Allow anyone to view post_images", {
 			as: "permissive",
 			for: "select",
 			to: ["anon", "authenticated"],
+			using: sql`true`,
 		}),
+		pgPolicy("Allow specific users to manage post_images", {
+			as: "permissive",
+			for: "all",
+			to: ["authenticated"],
+		}),
+	],
+);
+
+export const oauthClientsInAuth = auth.table(
+	"oauth_clients",
+	{
+		id: uuid().primaryKey().notNull(),
+		clientId: text("client_id").notNull(),
+		clientSecretHash: text("client_secret_hash").notNull(),
+		registrationType:
+			oauthRegistrationTypeInAuth("registration_type").notNull(),
+		redirectUris: text("redirect_uris").notNull(),
+		grantTypes: text("grant_types").notNull(),
+		clientName: text("client_name"),
+		clientUri: text("client_uri"),
+		logoUri: text("logo_uri"),
+		createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+			.defaultNow()
+			.notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+			.defaultNow()
+			.notNull(),
+		deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "string" }),
+	},
+	(table) => [
+		index("oauth_clients_client_id_idx").using(
+			"btree",
+			table.clientId.asc().nullsLast().op("text_ops"),
+		),
+		index("oauth_clients_deleted_at_idx").using(
+			"btree",
+			table.deletedAt.asc().nullsLast().op("timestamptz_ops"),
+		),
+		unique("oauth_clients_client_id_key").on(table.clientId),
+		check(
+			"oauth_clients_client_name_length",
+			sql`char_length(client_name) <= 1024`,
+		),
+		check(
+			"oauth_clients_client_uri_length",
+			sql`char_length(client_uri) <= 2048`,
+		),
+		check("oauth_clients_logo_uri_length", sql`char_length(logo_uri) <= 2048`),
 	],
 );
 
@@ -406,19 +437,26 @@ export const posts = pgTable(
 			name: "posts_submission_id_fkey",
 		}),
 		unique("posts_slug_key").on(table.slug),
-		pgPolicy("Anyone can view published posts", {
-			as: "permissive",
-			for: "select",
-			to: ["public"],
-			using: sql`((status = 'published'::post_status) AND (published = true))`,
-		}),
 		pgPolicy("Admins can do everything with posts", {
 			as: "permissive",
 			for: "all",
 			to: ["public"],
+			using: sql`is_admin()`,
 		}),
 	],
 );
+
+export const bucketsAnalyticsInStorage = storage.table("buckets_analytics", {
+	id: text().primaryKey().notNull(),
+	type: buckettypeInStorage().default("ANALYTICS").notNull(),
+	format: text().default("ICEBERG").notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+		.defaultNow()
+		.notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+		.defaultNow()
+		.notNull(),
+});
 
 export const submissions = pgTable(
 	"submissions",
@@ -481,6 +519,31 @@ export const mailingList = pgTable(
 	],
 );
 
+export const ssoProvidersInAuth = auth.table(
+	"sso_providers",
+	{
+		id: uuid().primaryKey().notNull(),
+		resourceId: text("resource_id"),
+		createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
+		updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
+		disabled: boolean(),
+	},
+	(table) => [
+		uniqueIndex("sso_providers_resource_id_idx").using(
+			"btree",
+			sql`lower(resource_id)`,
+		),
+		index("sso_providers_resource_id_pattern_idx").using(
+			"btree",
+			table.resourceId.asc().nullsLast().op("text_pattern_ops"),
+		),
+		check(
+			"resource_id not empty",
+			sql`(resource_id = NULL::text) OR (char_length(resource_id) > 0)`,
+		),
+	],
+);
+
 export const schemaMigrationsInAuth = auth.table("schema_migrations", {
 	version: varchar({ length: 255 }).primaryKey().notNull(),
 });
@@ -538,7 +601,9 @@ export const usersInAuth = auth.table(
 			mode: "string",
 		}),
 		phoneChange: text("phone_change").default(""),
-		phoneChangeToken: varchar("phone_change_token", { length: 255 }),
+		phoneChangeToken: varchar("phone_change_token", { length: 255 }).default(
+			"",
+		),
 		phoneChangeSentAt: timestamp("phone_change_sent_at", {
 			withTimezone: true,
 			mode: "string",
@@ -549,13 +614,17 @@ export const usersInAuth = auth.table(
 		}).generatedAlwaysAs(sql`LEAST(email_confirmed_at, phone_confirmed_at)`),
 		emailChangeTokenCurrent: varchar("email_change_token_current", {
 			length: 255,
-		}),
-		emailChangeConfirmStatus: smallint("email_change_confirm_status"),
+		}).default(""),
+		emailChangeConfirmStatus: smallint("email_change_confirm_status").default(
+			0,
+		),
 		bannedUntil: timestamp("banned_until", {
 			withTimezone: true,
 			mode: "string",
 		}),
-		reauthenticationToken: varchar("reauthentication_token", { length: 255 }),
+		reauthenticationToken: varchar("reauthentication_token", {
+			length: 255,
+		}).default(""),
 		reauthenticationSentAt: timestamp("reauthentication_sent_at", {
 			withTimezone: true,
 			mode: "string",
@@ -620,7 +689,7 @@ export const auditLogEntriesInAuth = auth.table(
 		id: uuid().primaryKey().notNull(),
 		payload: json(),
 		createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
-		ipAddress: varchar("ip_address", { length: 64 }),
+		ipAddress: varchar("ip_address", { length: 64 }).default("").notNull(),
 	},
 	(table) => [
 		index("audit_logs_instance_id_idx").using(
@@ -748,26 +817,6 @@ export const sessionsInAuth = auth.table(
 			foreignColumns: [usersInAuth.id],
 			name: "sessions_user_id_fkey",
 		}).onDelete("cascade"),
-	],
-);
-
-export const ssoProvidersInAuth = auth.table(
-	"sso_providers",
-	{
-		id: uuid().primaryKey().notNull(),
-		resourceId: text("resource_id"),
-		createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }),
-		updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
-	},
-	(table) => [
-		uniqueIndex("sso_providers_resource_id_idx").using(
-			"btree",
-			sql`lower(resource_id)`,
-		),
-		check(
-			"resource_id not empty",
-			sql`(resource_id = NULL::text) OR (char_length(resource_id) > 0)`,
-		),
 	],
 );
 
@@ -1118,5 +1167,42 @@ export const s3MultipartUploadsPartsInStorage = storage.table(
 			foreignColumns: [s3MultipartUploadsInStorage.id],
 			name: "s3_multipart_uploads_parts_upload_id_fkey",
 		}).onDelete("cascade"),
+	],
+);
+
+export const prefixesInStorage = storage.table(
+	"prefixes",
+	{
+		bucketId: text("bucket_id").notNull(),
+		name: text().notNull(),
+		level: integer()
+			.notNull()
+			.generatedAlwaysAs(sql`storage.get_level(name)`),
+		createdAt: timestamp("created_at", {
+			withTimezone: true,
+			mode: "string",
+		}).defaultNow(),
+		updatedAt: timestamp("updated_at", {
+			withTimezone: true,
+			mode: "string",
+		}).defaultNow(),
+	},
+	(table) => [
+		index("idx_prefixes_lower_name").using(
+			"btree",
+			sql`bucket_id`,
+			sql`level`,
+			sql`lower(name)`,
+			sql`null`,
+		),
+		foreignKey({
+			columns: [table.bucketId],
+			foreignColumns: [bucketsInStorage.id],
+			name: "prefixes_bucketId_fkey",
+		}),
+		primaryKey({
+			columns: [table.bucketId, table.name, table.level],
+			name: "prefixes_pkey",
+		}),
 	],
 );

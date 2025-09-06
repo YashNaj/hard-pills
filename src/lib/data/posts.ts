@@ -49,7 +49,8 @@ export const featuredPost: Post = {
   status: "published",
   featured: true,
   // Legacy compatibility
-  description: "Exploring the psychological challenges of admitting errors and how it leads to personal growth.",
+  description:
+    "Exploring the psychological challenges of admitting errors and how it leads to personal growth.",
   date: "2025-04-12",
   categories: ["Psychology", "Growth"],
   imageUrl: "/hard_pills.png",

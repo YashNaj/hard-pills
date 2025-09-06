@@ -57,9 +57,14 @@
         const uniqueFileName = `${uuidv4()}.${fileExt}`;
         const filePath = `public/${uniqueFileName}`;
         try {
-            const { data, error } = await supabase.storage.from('post_images').upload(filePath, file);
+            // Debug: Check current user
+            const { data: user } = await supabase.auth.getUser();
+            console.log('Current user ID:', user?.user?.id);
+            console.log('Uploading to bucket: post_images_original, path:', filePath);
+            
+            const { data, error } = await supabase.storage.from('post_images_original').upload(filePath, file);
             if (error) throw error;
-            const { data: urlData } = supabase.storage.from('post_images').getPublicUrl(filePath);
+            const { data: urlData } = supabase.storage.from('post_images_original').getPublicUrl(filePath);
             if (!urlData?.publicUrl) throw new Error('Failed to get public URL');
             // TODO: Link to DB
             return urlData.publicUrl;
@@ -84,7 +89,7 @@
 
 	// --- Autosave Logic ---
 	async function savePost(content: string) {
-		if (!postId || isSaving) return;
+		if (!postId || !postId.trim() || isSaving) return;
 		
 		isSaving = true;
 		saveError = null;
@@ -96,7 +101,7 @@
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					id: postId,
+					id: postId.trim(),
 					content,
 					title,
 					slug,
@@ -147,7 +152,7 @@
 				const content = currentEditor.getHTML();
 				onUpdate(content);
 				// Autosave with debounce
-				if (postId) {
+				if (postId && postId.trim()) {
 					debouncedSave(content);
 				}
 			},

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { usersInAuth, notifications, bucketsInStorage, objectsInStorage, profiles, posts, postImages, submissions, flowStateInAuth, samlRelayStatesInAuth, ssoProvidersInAuth, sessionsInAuth, refreshTokensInAuth, ssoDomainsInAuth, mfaAmrClaimsInAuth, samlProvidersInAuth, identitiesInAuth, oneTimeTokensInAuth, mfaFactorsInAuth, mfaChallengesInAuth, s3MultipartUploadsInStorage, s3MultipartUploadsPartsInStorage } from "./schema";
+import { usersInAuth, notifications, bucketsInStorage, objectsInStorage, posts, postImages, submissions, flowStateInAuth, samlRelayStatesInAuth, ssoProvidersInAuth, sessionsInAuth, refreshTokensInAuth, ssoDomainsInAuth, mfaAmrClaimsInAuth, samlProvidersInAuth, identitiesInAuth, oneTimeTokensInAuth, mfaFactorsInAuth, mfaChallengesInAuth, s3MultipartUploadsInStorage, s3MultipartUploadsPartsInStorage, prefixesInStorage } from "./schema";
 
 export const notificationsRelations = relations(notifications, ({one}) => ({
 	usersInAuth: one(usersInAuth, {
@@ -10,7 +10,6 @@ export const notificationsRelations = relations(notifications, ({one}) => ({
 
 export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	notifications: many(notifications),
-	profiles: many(profiles),
 	posts: many(posts),
 	sessionsInAuths: many(sessionsInAuth),
 	identitiesInAuths: many(identitiesInAuth),
@@ -29,13 +28,7 @@ export const bucketsInStorageRelations = relations(bucketsInStorage, ({many}) =>
 	objectsInStorages: many(objectsInStorage),
 	s3MultipartUploadsInStorages: many(s3MultipartUploadsInStorage),
 	s3MultipartUploadsPartsInStorages: many(s3MultipartUploadsPartsInStorage),
-}));
-
-export const profilesRelations = relations(profiles, ({one}) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [profiles.id],
-		references: [usersInAuth.id]
-	}),
+	prefixesInStorages: many(prefixesInStorage),
 }));
 
 export const postImagesRelations = relations(postImages, ({one, many}) => ({
@@ -183,5 +176,12 @@ export const s3MultipartUploadsPartsInStorageRelations = relations(s3MultipartUp
 	s3MultipartUploadsInStorage: one(s3MultipartUploadsInStorage, {
 		fields: [s3MultipartUploadsPartsInStorage.uploadId],
 		references: [s3MultipartUploadsInStorage.id]
+	}),
+}));
+
+export const prefixesInStorageRelations = relations(prefixesInStorage, ({one}) => ({
+	bucketsInStorage: one(bucketsInStorage, {
+		fields: [prefixesInStorage.bucketId],
+		references: [bucketsInStorage.id]
 	}),
 }));
